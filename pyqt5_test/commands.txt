@@ -1,0 +1,4 @@
+Genrate .py from .ui -> pyuic5 dialog.ui -o dialog.py
+
+create each window.ui separetely on Qtdesigner and connect in one.py all
+generated files
