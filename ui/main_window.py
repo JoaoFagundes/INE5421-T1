@@ -1,7 +1,5 @@
 from ui.main_window_ui import Ui_MainWindow
-from ui.not_ok_string_dialog import Ui_Dialog as Ui_not_ok
-from ui.ok_string_dialog import Ui_Dialog as Ui_ok
-from PyQt5.QtWidgets import QMainWindow, QDialog
+from PyQt5.QtWidgets import QMainWindow, QMessageBox
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
@@ -9,13 +7,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         QMainWindow.__init__(self)
         self.setupUi(self)
 
-        self.ok_dialog = QDialog()
-        ok_dialog_ui = Ui_ok()
-        ok_dialog_ui.setupUi(self.ok_dialog)
-
-        self.not_ok_dialog = QDialog()
-        not_ok_dialog_ui = Ui_not_ok()
-        not_ok_dialog_ui.setupUi(self.not_ok_dialog)
+        self.message = QMessageBox()
 
         self.checkStringButton.clicked.connect(self.check_string)
 
@@ -23,6 +15,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         accepted = False
 
         if accepted:
-            self.ok_dialog.show()
+            self.message.setText('The string is accepted by the automaton!')
+            self.message.show()
         else:
-            self.not_ok_dialog.show()
+            self.message.setText('The string is NOT accepted by the automaton!')
+            self.message.show()
