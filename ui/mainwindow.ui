@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>530</height>
+    <height>585</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
      <number>10</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="horizontalRe">
+     <layout class="QVBoxLayout" name="verticalRegex">
       <property name="spacing">
        <number>5</number>
       </property>
@@ -45,31 +45,49 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QLabel" name="reLabel">
+       <widget class="QLabel" name="regexLabel">
         <property name="font">
          <font>
-          <pointsize>10</pointsize>
+          <pointsize>11</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
          </font>
         </property>
         <property name="text">
-         <string>Regular Expression:</string>
+         <string>Regex</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="reInput"/>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="importRegexButton">
+          <property name="text">
+           <string>Import Regex</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="exportRegexButon">
+          <property name="text">
+           <string>Export Regex</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="convertRegexButton">
+          <property name="text">
+           <string>Convert to Automata</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QPushButton" name="convertReButton">
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Convert To Automata</string>
-        </property>
-       </widget>
+       <widget class="QLineEdit" name="regexInput"/>
       </item>
      </layout>
     </item>
@@ -270,7 +288,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalGr1">
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="grammarLabel">
         <property name="font">
          <font>
           <pointsize>11</pointsize>
@@ -383,6 +401,7 @@
     </property>
     <addaction name="actionUnion"/>
     <addaction name="actionConcatenation"/>
+    <addaction name="actionClosure"/>
    </widget>
    <widget class="QMenu" name="menuRegular_Language_Operations">
     <property name="title">
@@ -399,9 +418,9 @@
     <addaction name="actionDeterminize"/>
     <addaction name="actionMinimize"/>
    </widget>
-   <addaction name="menuGrammar_Operations"/>
    <addaction name="menuRegular_Language_Operations"/>
    <addaction name="menuFinite_Automata_Operations"/>
+   <addaction name="menuGrammar_Operations"/>
   </widget>
   <action name="actionUnion">
    <property name="text">
@@ -436,6 +455,11 @@
   <action name="actionMinimize">
    <property name="text">
     <string>Minimize</string>
+   </property>
+  </action>
+  <action name="actionClosure">
+   <property name="text">
+    <string>Closure</string>
    </property>
   </action>
  </widget>
