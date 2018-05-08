@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>585</height>
+    <width>545</width>
+    <height>636</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,7 +71,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="exportRegexButon">
+         <widget class="QPushButton" name="exportRegexButton">
           <property name="text">
            <string>Export Regex</string>
           </property>
@@ -119,7 +119,7 @@
          <number>5</number>
         </property>
         <item>
-         <widget class="QPushButton" name="importFAButton">
+         <widget class="QPushButton" name="importAutomataButton">
           <property name="font">
            <font>
             <pointsize>10</pointsize>
@@ -131,7 +131,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="exportFAButton">
+         <widget class="QPushButton" name="exportAutomataButton">
           <property name="font">
            <font>
             <pointsize>10</pointsize>
@@ -143,7 +143,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="convertFAButton">
+         <widget class="QPushButton" name="convertAutomataButton">
           <property name="font">
            <font>
             <pointsize>10</pointsize>
@@ -188,7 +188,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="removeStatteButton">
+           <widget class="QPushButton" name="removeStateButton">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
@@ -307,7 +307,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalGr1">
         <item>
-         <widget class="QPushButton" name="importGrButton">
+         <widget class="QPushButton" name="importGrammarButton">
           <property name="font">
            <font>
             <pointsize>10</pointsize>
@@ -319,7 +319,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="exportGrButton">
+         <widget class="QPushButton" name="exportGrammarButton">
           <property name="font">
            <font>
             <pointsize>10</pointsize>
@@ -331,7 +331,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="convertGrButton">
+         <widget class="QPushButton" name="convertGrammarButton">
           <property name="font">
            <font>
             <pointsize>10</pointsize>
@@ -391,7 +391,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>545</width>
      <height>22</height>
     </rect>
    </property>
@@ -407,7 +407,7 @@
     <property name="title">
      <string>Regular Language Operations</string>
     </property>
-    <addaction name="actionInstersection"/>
+    <addaction name="actionIntersection"/>
     <addaction name="actionDifference"/>
     <addaction name="actionReverse"/>
    </widget>
@@ -432,9 +432,9 @@
     <string>Concatenation</string>
    </property>
   </action>
-  <action name="actionInstersection">
+  <action name="actionIntersection">
    <property name="text">
-    <string>Instersection</string>
+    <string>Intersection</string>
    </property>
   </action>
   <action name="actionDifference">
