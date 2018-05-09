@@ -21,4 +21,3 @@ class Regex():
             self.string = data.get('regex_string')
         else:
             raise ValueError('Not a valid file!')
-

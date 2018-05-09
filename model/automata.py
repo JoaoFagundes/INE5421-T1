@@ -1,10 +1,9 @@
 import json
-from typing import Set, Dict
 
 class Automata():
 
     def __init__(self):
-        self.symbols = None
+        self.symbols = set()
         self.initial_state = None
         self.final_states = set()
         self.transitions = dict()
