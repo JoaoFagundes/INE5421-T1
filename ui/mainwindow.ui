@@ -395,18 +395,13 @@
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuGrammar_Operations">
-    <property name="title">
-     <string>Grammar Operations</string>
-    </property>
-    <addaction name="actionUnion"/>
-    <addaction name="actionConcatenation"/>
-    <addaction name="actionClosure"/>
-   </widget>
    <widget class="QMenu" name="menuRegular_Language_Operations">
     <property name="title">
      <string>Regular Language Operations</string>
     </property>
+    <addaction name="actionUnion"/>
+    <addaction name="actionConcatenation"/>
+    <addaction name="actionClosure"/>
     <addaction name="actionIntersection"/>
     <addaction name="actionDifference"/>
     <addaction name="actionReverse"/>
@@ -420,18 +415,7 @@
    </widget>
    <addaction name="menuRegular_Language_Operations"/>
    <addaction name="menuFinite_Automata_Operations"/>
-   <addaction name="menuGrammar_Operations"/>
   </widget>
-  <action name="actionUnion">
-   <property name="text">
-    <string>Union</string>
-   </property>
-  </action>
-  <action name="actionConcatenation">
-   <property name="text">
-    <string>Concatenation</string>
-   </property>
-  </action>
   <action name="actionIntersection">
    <property name="text">
     <string>Intersection</string>
@@ -455,6 +439,16 @@
   <action name="actionMinimize">
    <property name="text">
     <string>Minimize</string>
+   </property>
+  </action>
+  <action name="actionUnion">
+   <property name="text">
+    <string>Union</string>
+   </property>
+  </action>
+  <action name="actionConcatenation">
+   <property name="text">
+    <string>Concatenation</string>
    </property>
   </action>
   <action name="actionClosure">

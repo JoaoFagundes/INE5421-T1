@@ -87,34 +87,36 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.message.setText('Not implemented yet!')
         self.message.show()
 
+    def validate_finite_automata(self, automata):
+        if re.fullmatch(STATE_INPUT, automata.initial_state) is None:
+            return False
+        symbols = ','.join(sorted(automata.symbols))
+        if re.fullmatch(SYMBOL_INPUT, symbols) is None:
+            return False
+        states = ','.join(sorted(automata.states))
+        if re.fullmatch(STATE_INPUT, states) is None:
+            return False
+        final_states = ','.join(sorted(automata.final_states))
+        if final_states != '':    
+            if re.fullmatch(STATE_INPUT, final_states) is None:
+                return False
+
+        transitions = [','.join(sorted(v)) for k, v in automata.transitions.items()]
+        for transition in transitions:
+            if transition != '':
+                if re.fullmatch(STATE_INPUT, transition) is None:
+                    return False
+        
+        return True
+
     def import_automata(self):
         path, _ = QFileDialog.getOpenFileName(self)
-        self._automata = Automata()
         if path:
             try:
-                self._automata.load(path)
-                valid_automata = True
-                if re.fullmatch(STATE_INPUT, self._automata.initial_state) is None:
-                    valid_automata = False
-                symbols = ','.join(sorted(self._automata.symbols))
-                if re.fullmatch(SYMBOL_INPUT, symbols) is None:
-                    valid_automata = False
-                states = ','.join(sorted(self._automata.states))
-                if re.fullmatch(STATE_INPUT, states) is None:
-                    valid_automata = False
-                final_states = ','.join(sorted(self._automata.final_states))
-                if final_states != '':    
-                    if re.fullmatch(STATE_INPUT, final_states) is None:
-                        valid_automata = False
-
-                transitions = [','.join(sorted(v)) for k, v in self._automata.transitions.items()]
-                for transition in transitions:
-                    if transition != '':
-                        if re.fullmatch(STATE_INPUT, transition) is None:
-                            valid_automata =False
-                            break
-
-                if valid_automata:
+                automata = Automata()
+                automata.load(path)
+                if self.validate_finite_automata(automata):
+                    self._automata = automata
                     self.update_transition_table()
                 else:
                     QMessageBox.critical(self, 'Error', 'Not a valid automata')
@@ -221,8 +223,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.message.show()
 
     def check_string(self):
-        accepted = False
-
+        string = self.checkStringInput.text()
+        accepted = self._automata.membership(string)
         if accepted:
             self.message.setText('The string is accepted by the automaton!')
             self.message.show()
@@ -290,31 +292,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.transitionTable.cellChanged.connect(self.update_automata)
 
+    def validate_regular_grammar(self, grammar):
+        first = True
+        for k, v in grammar.productions.items():
+            text = k + '->'
+            for p in v:
+                text += p + '|'
+            if first:
+                if re.fullmatch(INITIAL_GRAMMAR, text[:-1]) is None:
+                    return False
+                else:    
+                    first = False
+            else:
+                if re.fullmatch(GRAMMAR_INPUT, text[:-1]) is None:
+                    return False
+        
+        return True
+
     def import_grammar(self):
         path, _ = QFileDialog.getOpenFileName(self)
-        self._grammar = Grammar()
         if path:
             try:
-                self._grammar.load(path)
-                first = True
-                for k, v in self._grammar.productions.items():
-                    text = k + '->'
-                    for p in v:
-                        text += p + '|'
-                    if first:
-                        if re.fullmatch(INITIAL_GRAMMAR, text[:-1]) is None:
-                            self._grammar = Grammar()
-                            QMessageBox.critical(self, 'Error', 'Not a regular grammar')
-                        else:    
-                            self.productionList.addItem(text[:-1])
-                            first = False
-                    else:
-                        if re.fullmatch(GRAMMAR_INPUT, text[:-1]) is None:
-                            self._grammar = Grammar()
-                            self.productionList.clear()
-                            QMessageBox.critical(self, 'Error', 'Not a regular grammar')
-                        else:
-                            self.productionList.addItem(text[:-1])
+                grammar = Grammar()
+                grammar.load(path)
+                if self.validate_regular_grammar(grammar):
+                    self._grammar = grammar
+                    self.update_grammar_list()
+                else:
+                    QMessageBox.critical(self, 'Error', 'Not a regular grammar')
 
             except ValueError as error:
                 QMessageBox.critical(self, 'Error', error.args[0])
@@ -419,6 +424,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.message.show()
                 
         self.productionList.itemChanged.connect(self.update_grammar)
+
+    def update_grammar_list(self):
+        for k, v in self._grammar.productions.items():
+            text = k + '->'
+            for p in v:
+                text += p + '|'
+            self.productionList.addItem(text[:-1])
 
     def intersection_action(self):
         self.message.setText('Not implemented yet!')

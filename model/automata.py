@@ -60,6 +60,19 @@ class Automata():
         else:
             self.final_states.add(state)
 
+    def membership(self, sentence):
+        current_states = set()
+        current_states.add(self.initial_state)
+        temporary_states = set()
+        for symbol in sentence:
+            for state in current_states:
+                [temporary_states.add(k) for k in self.transitions[state, symbol]]
+            current_states.clear()
+            [current_states.add(v) for v in temporary_states]
+            temporary_states.clear()
+
+        return ((current_states & self.final_states) != set())
+
     def save(self, path):
         data = {}
         data['object'] = 'automata'
