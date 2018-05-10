@@ -18,9 +18,6 @@ class Automata():
             states = ','.join(end_states - self.states)
             raise ValueError('States {} do not exist!'.format(states))
 
-    def remove_transition(self, begin_state, symbol):
-        pass
-
     def add_state(self, state):
         if self.initial_state is None:
             self.initial_state = state
@@ -58,10 +55,41 @@ class Automata():
                 del self.transitions[state, symbol]
 
     def add_final_state(self, state):
-        self.final_states.add(state)
+        if state in self.final_states:
+            self.final_states.discard(state)
+        else:
+            self.final_states.add(state)
 
     def save(self, path):
-        pass
+        data = {}
+        data['object'] = 'automata'
+        data['symbols'] = sorted(self.symbols)
+        data['states'] = sorted(self.states)
+        data['initial_state'] = self.initial_state
+        data['final_states'] = sorted(self.final_states)
+        data['transitions'] = [(k[0], k[1], sorted(v)) for k, v in self.transitions.items()]
+
+        with open(path, 'w') as automata_file:
+            json.dump(data, automata_file, indent=4)
 
     def load(self, path):
-        pass
+        with open(path, 'r') as automata_file:
+            data = json.load(automata_file)
+
+        if data.get('object') == 'automata':
+            self.symbols = set(data.get('symbols'))
+            self.states = set(data.get('states'))
+            self.initial_state = data.get('initial_state')
+            self.final_states = set(data.get('final_states'))
+            self.transitions = {(k[0], k[1]):k[2] for k in data.get('transitions')}
+
+        else:
+            raise ValueError('Not a valid file!')
+
+    def __str__(self):
+        symbols = 'symbol: ' + str(self.symbols) + '\n'
+        states = 'states: ' + str(self.states) + '\n'
+        initial = 'initial: ' + str(self.initial_state) + '\n'
+        final = 'final: ' + str(self.final_states) + '\n'
+        transitions = 'transitions: ' + str(self.transitions) + '\n'
+        return symbols + states + initial + final + transitions

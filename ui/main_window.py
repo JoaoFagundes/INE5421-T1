@@ -68,6 +68,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def import_regex(self):
         path, _ = QFileDialog.getOpenFileName(self)
+        self._regex = Regex()
         if path:
             try:
                 self._regex.load(path)
@@ -87,16 +88,47 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.message.show()
 
     def import_automata(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
+        path, _ = QFileDialog.getOpenFileName(self)
+        self._automata = Automata()
+        if path:
+            try:
+                self._automata.load(path)
+                valid_automata = True
+                if re.fullmatch(STATE_INPUT, self._automata.initial_state) is None:
+                    valid_automata = False
+                symbols = ','.join(sorted(self._automata.symbols))
+                if re.fullmatch(SYMBOL_INPUT, symbols) is None:
+                    valid_automata = False
+                states = ','.join(sorted(self._automata.states))
+                if re.fullmatch(STATE_INPUT, states) is None:
+                    valid_automata = False
+                final_states = ','.join(sorted(self._automata.final_states))
+                if final_states != '':    
+                    if re.fullmatch(STATE_INPUT, final_states) is None:
+                        valid_automata = False
+
+                transitions = [','.join(sorted(v)) for k, v in self._automata.transitions.items()]
+                for transition in transitions:
+                    if transition != '':
+                        if re.fullmatch(STATE_INPUT, transition) is None:
+                            valid_automata =False
+                            break
+
+                if valid_automata:
+                    self.update_transition_table()
+                else:
+                    QMessageBox.critical(self, 'Error', 'Not a valid automata')
+                
+            except ValueError as error:
+                QMessageBox.critical(self, 'Error', error.args[0])
 
     def export_automata(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
+        path, _ = QFileDialog.getSaveFileName(self)
+        if path:
+            self._automata.save(path)
 
     def convert_automata(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
+        print(self._automata)
 
     def add_state(self):
         text, ok = QInputDialog.getText(
@@ -115,8 +147,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_transition_table()
 
     def remove_state(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
+        text, ok = QInputDialog.getText(
+            self, 'Remove State', 'You can input a single state qN or a list of '+
+                               'states. e.g(q0, q1, ...)')
+        if ok:
+            text = text.strip().replace(' ', '')
+            while re.fullmatch(STATE_INPUT, text) is None:
+                text, ok = QInputDialog.getText(self, 'Remove State', 
+                    'The states have to be a \'q\' followed by a number')
+                if ok:
+                    text = text.strip().replace(' ', '')
+
+            for state in text.split(','):
+                self._automata.remove_state(state)
+                self.update_transition_table()
 
     def add_symbol(self):
         text, ok = QInputDialog.getText(
@@ -136,9 +180,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_transition_table()
 
     def remove_symbol(self):
-        print(self._automata.symbols)
-        print(self._automata.states)
-        print(self._automata.transitions)
+        text, ok = QInputDialog.getText(
+            self, ' Remove Symbol', 'You can input a single symbol or a list of '+
+                                'symbols. e.g(a, b, c, ...)')
+        
+        if ok:
+            text = text.strip().replace(' ', '')
+            while re.fullmatch(SYMBOL_INPUT, text) is None:
+                text, ok = QInputDialog.getText(self, 'Remove Symbol', 
+                    'Only lower case letters and numbers are accepted as symbols!')
+                if ok:
+                    text = text.strip().replace(' ', '')
+
+            for symbol in text.split(','):
+                self._automata.remove_symbol(symbol)
+                self.update_transition_table()
 
     def set_final_states(self):
         text, ok = QInputDialog.getText(
@@ -182,7 +238,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if text != '-':
             if re.fullmatch(STATE_INPUT, text) is None:
                 table_item.setText(self._table_data)
-                self.message.setText('The states have to be a \'q\' followed by a number')
+                self.message.setText('The states have to be a \'q\' followed by a number or a \'-\'')
                 self.message.show()
             else:
                 end_states = set(text.split(','))
@@ -236,6 +292,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def import_grammar(self):
         path, _ = QFileDialog.getOpenFileName(self)
+        self._grammar = Grammar()
         if path:
             try:
                 self._grammar.load(path)
