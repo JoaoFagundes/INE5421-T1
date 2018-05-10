@@ -224,14 +224,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="toggleFinalStateButton">
+           <widget class="QPushButton" name="setFinalStatesButton">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Toggle Final State</string>
+             <string>Set Final States</string>
             </property>
            </widget>
           </item>
@@ -297,7 +297,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Grammar</string>
+         <string>Regular Grammar</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

@@ -4,7 +4,8 @@ from model.regex import Regex
 from model.automata import Automata
 from ui.main_window_ui import Ui_MainWindow
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import (QMainWindow, QMessageBox, QInputDialog, QFileDialog)
+from PyQt5.QtWidgets import (
+    QMainWindow, QMessageBox, QInputDialog, QFileDialog, QTableWidgetItem)
 
 SYMBOL_INPUT='(([a-z0-9],)?)*[a-z0-9]'
 STATE_INPUT='(([q][0-9]*,)?)*q[0-9]*'
@@ -23,6 +24,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._automata = Automata()
         self._grammar = Grammar()
         self._item_data = ''
+        self._table_data = ''
 
         #Regex
         self.importRegexButton.clicked.connect(self.import_regex)
@@ -37,9 +39,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.removeStateButton.clicked.connect(self.remove_state)
         self.addSymbolButton.clicked.connect(self.add_symbol)
         self.removeSymbolButton.clicked.connect(self.remove_symbol)
-        self.toggleFinalStateButton.clicked.connect(self.toggle_final_state)
-        self.enumerateButton.clicked.connect(self.enumerate)
+        self.setFinalStatesButton.clicked.connect(self.set_final_states)
+        self.enumerateButton.clicked.connect(self.enumerate_strings)
         self.checkStringButton.clicked.connect(self.check_string)
+        self.transitionTable.itemClicked.connect(self.table_item_clicked)
+        self.transitionTable.itemDoubleClicked.connect(self.table_item_double_clicked)
         self.transitionTable.cellChanged.connect(self.update_automata)
 
         #Grammar
@@ -49,6 +53,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.addProdButton.clicked.connect(self.add_production)
         self.removeProdButton.clicked.connect(self.remove_production)
         self.productionList.itemClicked.connect(self.grammar_item_clicked)
+        self.productionList.itemDoubleClicked.connect(self.grammar_item_double_clicked)
         self.productionList.itemChanged.connect(self.update_grammar)
 
         #Operations
@@ -98,15 +103,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self, 'Add State', 'You can input a single state qN or a list of '+
                                'states. e.g(q0, q1, ...)')
         if ok:
-            text = text.strip().replace(" ", "")
+            text = text.strip().replace(' ', '')
             while re.fullmatch(STATE_INPUT, text) is None:
                 text, ok = QInputDialog.getText(self, 'Add State', 
-                    'The state has to be a \'q\' followed by a number')
+                    'The states have to be a \'q\' followed by a number')
                 if ok:
-                    text = text.strip().replace(" ", "")
+                    text = text.strip().replace(' ', '')
 
-            self.message.setText('Your input was: '+text)
-            self.message.show()
+            for state in text.split(','):
+                self._automata.add_state(state)
+                self.update_transition_table()
 
     def remove_state(self):
         self.message.setText('Not implemented yet!')
@@ -118,26 +124,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                 'symbols. e.g(a, b, c, ...)')
         
         if ok:
-            text = text.strip().replace(" ", "")
+            text = text.strip().replace(' ', '')
             while re.fullmatch(SYMBOL_INPUT, text) is None:
                 text, ok = QInputDialog.getText(self, 'Add Symbol', 
                     'Only lower case letters and numbers are accepted as symbols!')
                 if ok:
-                    text = text.strip().replace(" ", "")
+                    text = text.strip().replace(' ', '')
 
-            self.message.setText(text)
-            self.message.show()
-                
+            for symbol in text.split(','):
+                self._automata.add_symbol(symbol)
+                self.update_transition_table()
 
     def remove_symbol(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
+        print(self._automata.symbols)
+        print(self._automata.states)
+        print(self._automata.transitions)
 
-    def toggle_final_state(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
+    def set_final_states(self):
+        text, ok = QInputDialog.getText(
+            self, 'Set Final States', 'You can input a single state qN or a list of '+
+                               'states. e.g(q0, q1, ...)')
+        
+        if ok:
+            text = text.strip().replace(' ', '')
+            while re.fullmatch(STATE_INPUT, text) is None:
+                text, ok = QInputDialog.getText(self, 'Set Final States', 
+                    'The states have to be a \'q\' followed by a number')
+                if ok:
+                    text = text.strip().replace(' ', '')
 
-    def enumerate(self):
+            for state in text.split(','):
+                self._automata.add_final_state(state)
+                self.update_transition_table()
+
+    def enumerate_strings(self):
         n, ok = QInputDialog.getInt(
             self, 'Enumerate', 'Which size of sentence')
         if ok:
@@ -154,19 +174,90 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.message.setText('The string is NOT accepted by the automaton!')
             self.message.show()
 
-    def update_automata(self):
-        pass
+    def update_automata(self, row, col):
+        table_item = self.transitionTable.item(row, col)
+        text = table_item.text().replace(' ', '')
+        states = sorted(self._automata.states)
+        symbols = sorted(self._automata.symbols)
+        if text != '-':
+            if re.fullmatch(STATE_INPUT, text) is None:
+                table_item.setText(self._table_data)
+                self.message.setText('The states have to be a \'q\' followed by a number')
+                self.message.show()
+            else:
+                end_states = set(text.split(','))
+                try:
+                    self._automata.add_transition(states[row], symbols[col], end_states)
+                except ValueError as error:
+                    self.transitionTable.cellChanged.disconnect(self.update_automata)
+                    table_item.setText(self._table_data)
+                    self.transitionTable.cellChanged.connect(self.update_automata)
+                    QMessageBox.critical(self, 'Error', error.args[0])
+        else:
+            self._automata.add_transition(states[row], symbols[col], set())
+
+    def table_item_clicked(self, item):
+        self.transitionTable.cellChanged.disconnect(self.update_automata)
+        self._table_data = item.text()
+        self.transitionTable.cellChanged.connect(self.update_automata)
+
+    def table_item_double_clicked(self, item):
+        self.transitionTable.cellChanged.disconnect(self.update_automata)
+        item.setText(self._table_data)
+        self.transitionTable.cellChanged.connect(self.update_automata)
+
+    def update_transition_table(self):
+        self.transitionTable.cellChanged.disconnect(self.update_automata)
+
+        states = []
+        for state in sorted(self._automata.states):
+            preffix = ''
+            if state == self._automata.initial_state:
+                preffix += '->'
+            if state in self._automata.final_states:
+                preffix += '*'
+            states.append(preffix + state)
+
+        self.transitionTable.setRowCount(len(states))
+        self.transitionTable.setVerticalHeaderLabels(states)
+
+        self.transitionTable.setColumnCount(len(self._automata.symbols))
+        self.transitionTable.setHorizontalHeaderLabels(sorted(self._automata.symbols))
+
+        for i, state in enumerate(sorted(self._automata.states)):
+            for j, symbol in enumerate(sorted(self._automata.symbols)):
+                if (state, symbol) in self._automata.transitions:
+                    item = ','.join(sorted(self._automata.transitions[state, symbol])) 
+                else:
+                    item = '-'
+                self.transitionTable.setItem(i, j, QTableWidgetItem(item))
+
+        self.transitionTable.cellChanged.connect(self.update_automata)
 
     def import_grammar(self):
         path, _ = QFileDialog.getOpenFileName(self)
         if path:
             try:
                 self._grammar.load(path)
+                first = True
                 for k, v in self._grammar.productions.items():
                     text = k + '->'
                     for p in v:
                         text += p + '|'
-                    self.productionList.addItem(text[:-1])
+                    if first:
+                        if re.fullmatch(INITIAL_GRAMMAR, text[:-1]) is None:
+                            self._grammar = Grammar()
+                            QMessageBox.critical(self, 'Error', 'Not a regular grammar')
+                        else:    
+                            self.productionList.addItem(text[:-1])
+                            first = False
+                    else:
+                        if re.fullmatch(GRAMMAR_INPUT, text[:-1]) is None:
+                            self._grammar = Grammar()
+                            self.productionList.clear()
+                            QMessageBox.critical(self, 'Error', 'Not a regular grammar')
+                        else:
+                            self.productionList.addItem(text[:-1])
 
             except ValueError as error:
                 QMessageBox.critical(self, 'Error', error.args[0])
@@ -188,12 +279,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                       'e.g(A -> aA | bB)')
         
             if ok:
-                text = text.strip().replace(" ", "")
+                text = text.strip().replace(' ', '')
                 while re.fullmatch(INITIAL_GRAMMAR, text) is None:
                     text, ok = QInputDialog.getText(self, 'Add Initial Production', 
                         'Production not regular!')
                     if ok:
-                        text = text.strip().replace(" ", "")
+                        text = text.strip().replace(' ', '')
 
                 self.productionList.addItem(text)
                 key, set_values = text.split('->')    
@@ -205,12 +296,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                       'e.g(A -> aA | bB)')
         
             if ok:
-                text = text.strip().replace(" ", "")
+                text = text.strip().replace(' ', '')
                 while re.fullmatch(GRAMMAR_INPUT, text) is None:
                     text, ok = QInputDialog.getText(self, 'Add Production', 
                         'Production not regular!')
                     if ok:
-                        text = text.strip().replace(" ", "")
+                        text = text.strip().replace(' ', '')
 
                 key, set_values = text.split('->')
                 if key not in keys:
@@ -232,10 +323,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._item_data=item.text()
         self.productionList.itemChanged.connect(self.update_grammar)
 
+    def grammar_item_double_clicked(self, item):
+        self.productionList.itemChanged.disconnect(self.update_grammar)
+        item.setText(self._item_data)
+        self.productionList.itemChanged.connect(self.update_grammar)
+
     def update_grammar(self, item):
         self.productionList.itemChanged.disconnect(self.update_grammar)
         keys = self._grammar.productions.keys()
-        print(self.productionList.indexFromItem(item).row())
         if self.productionList.indexFromItem(item).row() == 0:
             if re.fullmatch(INITIAL_GRAMMAR, item.text()) is None:
                 item.setText(self._item_data)
