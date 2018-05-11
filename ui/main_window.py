@@ -97,7 +97,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if re.fullmatch(STATE_INPUT, states) is None:
             return False
         final_states = ','.join(sorted(automata.final_states))
-        if final_states != '':    
+        if final_states != '':
             if re.fullmatch(STATE_INPUT, final_states) is None:
                 return False
 
@@ -106,7 +106,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if transition != '':
                 if re.fullmatch(STATE_INPUT, transition) is None:
                     return False
-        
+
         return True
 
     def import_automata(self):
@@ -120,7 +120,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self.update_transition_table()
                 else:
                     QMessageBox.critical(self, 'Error', 'Not a valid automata')
-                
+
             except ValueError as error:
                 QMessageBox.critical(self, 'Error', error.args[0])
 
@@ -139,7 +139,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if ok:
             text = text.strip().replace(' ', '')
             while re.fullmatch(STATE_INPUT, text) is None:
-                text, ok = QInputDialog.getText(self, 'Add State', 
+                text, ok = QInputDialog.getText(self, 'Add State',
                     'The states have to be a \'q\' followed by a number')
                 if ok:
                     text = text.strip().replace(' ', '')
@@ -155,7 +155,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if ok:
             text = text.strip().replace(' ', '')
             while re.fullmatch(STATE_INPUT, text) is None:
-                text, ok = QInputDialog.getText(self, 'Remove State', 
+                text, ok = QInputDialog.getText(self, 'Remove State',
                     'The states have to be a \'q\' followed by a number')
                 if ok:
                     text = text.strip().replace(' ', '')
@@ -168,11 +168,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         text, ok = QInputDialog.getText(
             self, 'Add Symbol', 'You can input a single symbol or a list of '+
                                 'symbols. e.g(a, b, c, ...)')
-        
+
         if ok:
             text = text.strip().replace(' ', '')
             while re.fullmatch(SYMBOL_INPUT, text) is None:
-                text, ok = QInputDialog.getText(self, 'Add Symbol', 
+                text, ok = QInputDialog.getText(self, 'Add Symbol',
                     'Only lower case letters and numbers are accepted as symbols!')
                 if ok:
                     text = text.strip().replace(' ', '')
@@ -185,11 +185,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         text, ok = QInputDialog.getText(
             self, ' Remove Symbol', 'You can input a single symbol or a list of '+
                                 'symbols. e.g(a, b, c, ...)')
-        
+
         if ok:
             text = text.strip().replace(' ', '')
             while re.fullmatch(SYMBOL_INPUT, text) is None:
-                text, ok = QInputDialog.getText(self, 'Remove Symbol', 
+                text, ok = QInputDialog.getText(self, 'Remove Symbol',
                     'Only lower case letters and numbers are accepted as symbols!')
                 if ok:
                     text = text.strip().replace(' ', '')
@@ -202,11 +202,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         text, ok = QInputDialog.getText(
             self, 'Set Final States', 'You can input a single state qN or a list of '+
                                'states. e.g(q0, q1, ...)')
-        
+
         if ok:
             text = text.strip().replace(' ', '')
             while re.fullmatch(STATE_INPUT, text) is None:
-                text, ok = QInputDialog.getText(self, 'Set Final States', 
+                text, ok = QInputDialog.getText(self, 'Set Final States',
                     'The states have to be a \'q\' followed by a number')
                 if ok:
                     text = text.strip().replace(' ', '')
@@ -219,8 +219,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         n, ok = QInputDialog.getInt(
             self, 'Enumerate', 'Which size of sentence')
         if ok:
-            self.message.setText('Enumerate sentences with size: '+str(n))
-            self.message.show()
+            try:
+                accepted = self._automata.enumerate(n)
+                if accepted == set():
+                    accepted = 'There aren\'t sentences with this size!'
+                else:
+                    accepted = ','.join(v for v in accepted)
+                self.message.setText('Enumerate sentences with size: '+str(n)+'\n'+accepted)
+                self.message.show()
+            except ValueError as error:
+                QMessageBox.critical(self, 'Error', error.args[0])
 
     def check_string(self):
         string = self.checkStringInput.text()
@@ -285,7 +293,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         for i, state in enumerate(sorted(self._automata.states)):
             for j, symbol in enumerate(sorted(self._automata.symbols)):
                 if (state, symbol) in self._automata.transitions:
-                    item = ','.join(sorted(self._automata.transitions[state, symbol])) 
+                    item = ','.join(sorted(self._automata.transitions[state, symbol]))
                 else:
                     item = '-'
                 self.transitionTable.setItem(i, j, QTableWidgetItem(item))
@@ -301,12 +309,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if first:
                 if re.fullmatch(INITIAL_GRAMMAR, text[:-1]) is None:
                     return False
-                else:    
+                else:
                     first = False
             else:
                 if re.fullmatch(GRAMMAR_INPUT, text[:-1]) is None:
                     return False
-        
+
         return True
 
     def import_grammar(self):
@@ -339,28 +347,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             text, ok = QInputDialog.getText(
                 self, 'Add Initial Production', 'Input a production '+
                       'e.g(A -> aA | bB)')
-        
+
             if ok:
                 text = text.strip().replace(' ', '')
                 while re.fullmatch(INITIAL_GRAMMAR, text) is None:
-                    text, ok = QInputDialog.getText(self, 'Add Initial Production', 
+                    text, ok = QInputDialog.getText(self, 'Add Initial Production',
                         'Production not regular!')
                     if ok:
                         text = text.strip().replace(' ', '')
 
                 self.productionList.addItem(text)
-                key, set_values = text.split('->')    
+                key, set_values = text.split('->')
                 self._grammar.add(key, set(set_values.split('|')))
 
         else:
             text, ok = QInputDialog.getText(
                 self, 'Add Production', 'Input a production '+
                       'e.g(A -> aA | bB)')
-        
+
             if ok:
                 text = text.strip().replace(' ', '')
                 while re.fullmatch(GRAMMAR_INPUT, text) is None:
-                    text, ok = QInputDialog.getText(self, 'Add Production', 
+                    text, ok = QInputDialog.getText(self, 'Add Production',
                         'Production not regular!')
                     if ok:
                         text = text.strip().replace(' ', '')
@@ -422,7 +430,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     item.setText(self._item_data)
                     self.message.setText('This non terminal symbol already exists!')
                     self.message.show()
-                
+
         self.productionList.itemChanged.connect(self.update_grammar)
 
     def update_grammar_list(self):

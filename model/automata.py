@@ -61,8 +61,7 @@ class Automata():
             self.final_states.add(state)
 
     def membership(self, sentence):
-        current_states = set()
-        current_states.add(self.initial_state)
+        current_states = {self.initial_state}
         temporary_states = set()
         for symbol in sentence:
             for state in current_states:
@@ -72,6 +71,27 @@ class Automata():
             temporary_states.clear()
 
         return ((current_states & self.final_states) != set())
+
+    def enumerate(self, n):
+        if n < 0:
+            raise ValueError('Must be a natural number')
+
+        if n == 0 and self.initial_state in self.final_states:
+            return "&"
+
+        keys = {k for k, v in self.transitions.items() if v & self.final_states != set()}
+        maybe_accepted_strings = {(key[0], key[1]) for key in keys}
+        for i in range(n-1):
+            old_strings = maybe_accepted_strings.copy()
+            maybe_accepted_strings = set()
+            for string in old_strings:
+                new_states = {k for k, v in self.transitions.items() if string[0] in v}
+                for new_state in new_states:
+                    maybe_accepted_strings.add((new_state[0], new_state[1]+string[1]))
+
+        accepted_strings = {s[1] for s in maybe_accepted_strings if s[0] == self.initial_state}
+        return accepted_strings
+
 
     def save(self, path):
         data = {}
@@ -94,7 +114,7 @@ class Automata():
             self.states = set(data.get('states'))
             self.initial_state = data.get('initial_state')
             self.final_states = set(data.get('final_states'))
-            self.transitions = {(k[0], k[1]):k[2] for k in data.get('transitions')}
+            self.transitions = {(k[0], k[1]):set(k[2]) for k in data.get('transitions')}
 
         else:
             raise ValueError('Not a valid file!')
