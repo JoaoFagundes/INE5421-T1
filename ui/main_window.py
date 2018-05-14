@@ -215,6 +215,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self._automata.add_final_state(state)
                 self.update_transition_table()
 
+    def determinize_action(self):
+        self._automata.determinize()
+
+        self.update_transition_table()
+
     def enumerate_strings(self):
         n, ok = QInputDialog.getInt(
             self, 'Enumerate', 'Which size of sentence')
@@ -441,10 +446,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.message.show()
 
     def reverse_action(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
-
-    def determinize_action(self):
         self.message.setText('Not implemented yet!')
         self.message.show()
 

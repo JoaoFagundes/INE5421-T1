@@ -73,6 +73,51 @@ class Automata():
 
         return ((current_states & self.final_states) != set())
 
+    def determinize(self):
+        statesToDeterminize = list()
+
+        newTransitions = dict()
+        newStates = set()
+        newFinalStates = set()
+        newInitialState = "{" + self.initial_state + "}"
+        newStates.add(newInitialState)
+        statesToDeterminize.append(newInitialState)
+        self.initial_state = newInitialState
+
+        for state in statesToDeterminize:
+            isFinalState = False
+            state = state[:-1]
+            state = state.replace('{', '')
+            state = state.replace(' ', '')
+            for symbol in self.symbols:
+                newState = "{"
+                determinization = set()
+
+                for st in state.split(','):
+                    for t in self.transitions[st, symbol]:
+                        determinization.add(t)
+                
+                for d in determinization:
+                    if d in self.final_states:
+                        isFinalState = True
+
+                    newState += d + ","
+
+                newState = newState[:-1] + '}'
+                newStates.add(newState)
+                if isFinalState:
+                    newFinalStates.add(newState)
+                newTransitions[state, symbol] = newState
+                
+                if newState not in statesToDeterminize:
+                    statesToDeterminize.append(newState)
+
+        self.states = newStates
+        self.final_states = newFinalStates
+        self.transitions = newTransitions
+
+        
+
     def save(self, path):
         data = {}
         data['object'] = 'automata'
