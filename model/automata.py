@@ -94,8 +94,11 @@ class Automata():
                 determinization = set()
 
                 for st in state.split(','):
-                    for t in self.transitions[st, symbol]:
-                        determinization.add(t)
+                    try:
+                        for t in self.transitions[st, symbol]:
+                            determinization.add(t)
+                    except KeyError:
+                        continue
                 
                 for d in determinization:
                     if d in self.final_states:
@@ -103,20 +106,53 @@ class Automata():
 
                     newState += d + ","
 
-                newState = newState[:-1] + '}'
-                newStates.add(newState)
-                if isFinalState:
-                    newFinalStates.add(newState)
-                newTransitions[state, symbol] = newState
-                
-                if newState not in statesToDeterminize:
-                    statesToDeterminize.append(newState)
+                if newState != "{":
+                    newState = newState[:-1] + '}'
+                    newStates.add(newState)
+                    if isFinalState:
+                        newFinalStates.add(newState)
+                    newTransitions['{' + state + '}', symbol] = {newState}
+                    
+                    if newState not in statesToDeterminize:
+                        statesToDeterminize.append(newState)
+
 
         self.states = newStates
         self.final_states = newFinalStates
         self.transitions = newTransitions
 
         
+
+    def rename_states(self):
+        i = int(1)
+        statesMap = dict()
+        newStates = set()
+        newTransitions = dict()
+        statesMap[self.initial_state] = "q0"
+        self.initial_state = "q0"
+        newStates.add(self.initial_state)
+
+        for state in self.states:
+            state = state.replace('{', '')
+            state = state.replace('}', '')
+            if state != 'q0':
+                newState = "q" + str(i)
+                statesMap['{' + state + '}'] = newState
+                newStates.add(newState)
+                i += 1
+        
+        for state in self.states:
+            for symbol in self.symbols:
+                try:
+                    for t in self.transitions[state, symbol]:
+                        newTransitions[statesMap[state], symbol] = {statesMap[t]}
+                except KeyError:
+                    continue
+        
+        self.transitions = newTransitions
+        self.states = newStates
+        
+
 
     def save(self, path):
         data = {}

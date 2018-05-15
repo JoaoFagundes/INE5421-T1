@@ -218,6 +218,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def determinize_action(self):
         self._automata.determinize()
 
+        self._automata.rename_states()
+
         self.update_transition_table()
 
     def enumerate_strings(self):
