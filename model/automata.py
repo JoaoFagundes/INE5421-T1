@@ -77,7 +77,7 @@ class Automata():
             raise ValueError('Must be a natural number')
 
         if n == 0 and self.initial_state in self.final_states:
-            return "&"
+            return '&'
 
         keys = {k for k, v in self.transitions.items() if v & self.final_states != set()}
         maybe_accepted_strings = {(key[0], key[1]) for key in keys}
@@ -92,6 +92,85 @@ class Automata():
         accepted_strings = {s[1] for s in maybe_accepted_strings if s[0] == self.initial_state}
         return accepted_strings
 
+    def determinize(self):
+        statesToDeterminize = list()
+
+        newTransitions = dict()
+        newStates = set()
+        newFinalStates = set()
+        newInitialState = '{' + self.initial_state + '}'
+        newStates.add(newInitialState)
+        statesToDeterminize.append(newInitialState)
+        self.initial_state = newInitialState
+
+        for state in statesToDeterminize:
+            isFinalState = False
+            state = state[:-1]
+            state = state.replace('{', '')
+            state = state.replace(' ', '')
+            for symbol in self.symbols:
+                newState = '{'
+                determinization = set()
+
+                for st in state.split(','):
+                    try:
+                        for t in self.transitions[st, symbol]:
+                            determinization.add(t)
+                    except KeyError:
+                        continue
+
+                for d in determinization:
+                    if d in self.final_states:
+                        isFinalState = True
+
+                    newState += d + ','
+
+                if newState != '{':
+                    newState = newState[:-1] + '}'
+                    newStates.add(newState)
+                    if isFinalState:
+                        newFinalStates.add(newState)
+                    newTransitions['{' + state + '}', symbol] = {newState}
+
+                    if newState not in statesToDeterminize:
+                        statesToDeterminize.append(newState)
+
+
+        self.states = newStates
+        self.final_states = newFinalStates
+        self.transitions = newTransitions
+        self.rename_states()
+
+    def rename_states(self):
+        i = int(1)
+        statesMap = dict()
+        newStates = set()
+        newTransitions = dict()
+        statesMap[self.initial_state] = 'q0'
+        self.initial_state = 'q0'
+        newStates.add(self.initial_state)
+
+        for state in self.states:
+            state = state.replace('{', '')
+            state = state.replace('}', '')
+            if state != 'q0':
+                newState = 'q' + str(i)
+                statesMap[state] = newState
+                newStates.add(newState)
+                i += 1
+
+        for state in self.states:
+            state = state.replace('{', '')
+            state = state.replace('}', '')
+            for symbol in self.symbols:
+                try:
+                    for t in self.transitions[state, symbol]:
+                        newTransitions[statesMap[state], symbol] = {statesMap[t]}
+                except KeyError:
+                    continue
+
+        self.transitions = newTransitions
+        self.states = newStates
 
     def save(self, path):
         data = {}
