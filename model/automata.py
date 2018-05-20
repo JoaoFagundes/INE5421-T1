@@ -1,5 +1,6 @@
 import json
 import string
+import re
 
 class Automata():
 
@@ -139,6 +140,13 @@ class Automata():
                     if newState not in statesToDeterminize:
                         statesToDeterminize.append(newState)
 
+        for s in self.symbols:
+            for state in newStates:
+                try:
+                    test = newTransitions[state, s]
+                except KeyError:
+                    newTransitions[state, s] = set()
+
         self.states = newStates
         self.final_states = newFinalStates
         self.transitions = newTransitions
@@ -206,6 +214,13 @@ class Automata():
                         productions.add(s)
                     productions.add(s+map_state_letter[aux_state])
             grammar.add(map_state_letter[state], productions)
+
+        for k, v in grammar.productions.items():
+            if v == set():
+                for i, j in grammar.productions.items():
+                    discard = [discard_s for discard_s in j if re.search(k, discard_s)]
+                    for s in discard:
+                        j.discard(s)
         
         return grammar
 
@@ -240,6 +255,13 @@ class Automata():
                         newTransitions[statesMap[state], symbol] = {statesMap[t]}
                 except KeyError:
                     continue
+
+        for s in self.symbols:
+            for state in newStates:
+                try:
+                    test = newTransitions[state, s]
+                except KeyError:
+                    newTransitions[state, s] = set()
 
         self.transitions = newTransitions
         self.states = newStates

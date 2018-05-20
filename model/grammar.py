@@ -24,6 +24,52 @@ class Grammar():
     def convert_to_automata(self):
         from .automata import Automata
         automata = Automata()
+        map_letter_state = dict()
+        i = int(0)
+        map_letter_state[self.initial_symbol()] = 'q'+str(i)
+        automata.initial_state = 'q'+str(i)
+        for k in self.productions.keys()-{self.initial_symbol()}:
+            i += 1
+            map_letter_state[k] = 'q'+str(i)
+            automata.states.add('q'+str(i))
+
+        final_state = 'q'+str(i+1)
+        automata.add_final_state(final_state)
+        automata.states.add(final_state)
+
+        initial_productions = self.productions[self.initial_symbol()]
+        if '&' in initial_productions:
+            automata.add_final_state(map_letter_state[self.initial_symbol()])
+
+        for k, values in self.productions.items():
+            end_states = dict()
+            for v in values:
+                try:
+                    lower_symbol = v[0]
+                    upper_symbol = v[1]
+                    if lower_symbol not in end_states.keys():
+                        end_states[lower_symbol] = {map_letter_state[upper_symbol]}
+                    else:
+                        aux = end_states[lower_symbol]
+                        aux.add(map_letter_state[upper_symbol])
+                        end_states[lower_symbol] = aux
+
+                except IndexError:
+                    lower_symbol = v[0]
+                    if lower_symbol not in end_states.keys():
+                        end_states[lower_symbol] = {final_state}
+                    else:
+                        aux = end_states[lower_symbol]
+                        aux.add(final_state)
+                        end_states[lower_symbol] = aux
+
+            for i, j in end_states.items():
+                automata.add_symbol(i)
+                automata.add_transition(map_letter_state[k], i, j)
+
+        for s in automata.symbols:
+            automata.transitions[final_state, s] = set()
+
         return automata
 
     def save(self, path):

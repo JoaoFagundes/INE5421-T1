@@ -171,6 +171,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             for state in text.split(','):
                 self._automata.add_state(state)
+                for s in self._automata.symbols:
+                    self._automata.transitions[state, s] = set()
                 self.update_transition_table()
 
     def remove_state(self):
@@ -373,6 +375,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def convert_grammar(self):
         self.add_automata_to_list()
         self._automata = self._grammar.convert_to_automata()
+        self._automata.determinize()
+        self._automata.rename_states()
         self.update_transition_table()
 
     def add_production(self):
@@ -470,6 +474,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_grammar_list(self):
         self.productionList.clear()
         for k, v in self._grammar.productions.items():
+            if v == set():
+                continue
             text = k + '->'
             for p in v:
                 text += p + '|'
