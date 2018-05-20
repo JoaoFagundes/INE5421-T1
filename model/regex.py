@@ -5,6 +5,9 @@ class Regex():
     def __init__(self, regex_string=None):
         self.string = regex_string
 
+    def convert_to_automata(self):
+        pass
+
     def save(self, path):
         data = {}
         data['object'] = 'regex'

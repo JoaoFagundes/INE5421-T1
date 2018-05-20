@@ -21,6 +21,9 @@ class Grammar():
                         if k == old_key else (k,v) for k, v in self.productions.items()])
         self.add(new_key, set_values)
 
+    def convert_to_automata(self):
+        pass
+
     def save(self, path):
         data = {}
         data['object'] = 'grammar'

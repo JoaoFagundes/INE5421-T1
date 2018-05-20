@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>545</width>
-    <height>636</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
     <property name="spacing">
      <number>5</number>
     </property>
@@ -31,7 +31,41 @@
      <number>10</number>
     </property>
     <item>
-     <layout class="QVBoxLayout" name="verticalRegex">
+     <layout class="QVBoxLayout" name="verticalAutomataList">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
+      </property>
+      <item>
+       <widget class="QLabel" name="automataListLabel">
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Automata List</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="automataList">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayoutMain" stretch="0,0,0">
       <property name="spacing">
        <number>5</number>
       </property>
@@ -44,339 +78,361 @@
       <property name="topMargin">
        <number>0</number>
       </property>
-      <item>
-       <widget class="QLabel" name="regexLabel">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Regex</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QPushButton" name="importRegexButton">
-          <property name="text">
-           <string>Import Regex</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="exportRegexButton">
-          <property name="text">
-           <string>Export Regex</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="convertRegexButton">
-          <property name="text">
-           <string>Convert to Automata</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="regexInput"/>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalFA1">
-      <property name="spacing">
-       <number>5</number>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
       </property>
       <item>
-       <widget class="QLabel" name="automataLabel">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Automata</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalFA1">
+       <layout class="QVBoxLayout" name="verticalRegex">
         <property name="spacing">
          <number>5</number>
         </property>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
         <item>
-         <widget class="QPushButton" name="importAutomataButton">
+         <widget class="QLabel" name="regexLabel">
           <property name="font">
            <font>
-            <pointsize>10</pointsize>
+            <pointsize>11</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
            </font>
           </property>
           <property name="text">
-           <string>Import Automata</string>
+           <string>Regex</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="exportAutomataButton">
-          <property name="font">
-           <font>
-            <pointsize>10</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Export Automata</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QPushButton" name="importRegexButton">
+            <property name="text">
+             <string>Import Regex</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="exportRegexButton">
+            <property name="text">
+             <string>Export Regex</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="convertRegexButton">
+            <property name="text">
+             <string>Convert to Automata</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="convertAutomataButton">
-          <property name="font">
-           <font>
-            <pointsize>10</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Convert to Grammar</string>
-          </property>
-         </widget>
+         <widget class="QLineEdit" name="regexInput"/>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalFA2">
+       <layout class="QVBoxLayout" name="verticalFA1">
         <property name="spacing">
          <number>5</number>
         </property>
         <item>
-         <widget class="QTableWidget" name="transitionTable"/>
+         <widget class="QLabel" name="automataLabel">
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Automata</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalFA2">
+         <layout class="QHBoxLayout" name="horizontalFA1">
           <property name="spacing">
            <number>5</number>
           </property>
-          <property name="leftMargin">
-           <number>0</number>
+          <item>
+           <widget class="QPushButton" name="importAutomataButton">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Import Automata</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="exportAutomataButton">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Export Automata</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="convertAutomataButton">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Convert to Grammar</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalFA2">
+          <property name="spacing">
+           <number>5</number>
           </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
           <item>
-           <widget class="QPushButton" name="addStateButton">
+           <widget class="QTableWidget" name="transitionTable"/>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalFA2">
+            <property name="spacing">
+             <number>5</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="addStateButton">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Add State</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="removeStateButton">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Remove State</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="addSymbolButton">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Add Symbol</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="removeSymbolButton">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Remove Symbol</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="setFinalStatesButton">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Set Final States</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="enumerateButton">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Enumerate</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalFASpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalFA3">
+          <item>
+           <widget class="QLineEdit" name="checkStringInput"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="checkStringButton">
             <property name="font">
              <font>
               <pointsize>10</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Add State</string>
+             <string>Check String</string>
             </property>
            </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="removeStateButton">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Remove State</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="addSymbolButton">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Add Symbol</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="removeSymbolButton">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Remove Symbol</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="setFinalStatesButton">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Set Final States</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="enumerateButton">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Enumerate</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="verticalFASpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalFA3">
+       <layout class="QVBoxLayout" name="verticalGr1">
         <item>
-         <widget class="QLineEdit" name="checkStringInput"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="checkStringButton">
+         <widget class="QLabel" name="grammarLabel">
           <property name="font">
            <font>
-            <pointsize>10</pointsize>
+            <pointsize>11</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
            </font>
           </property>
           <property name="text">
-           <string>Check String</string>
+           <string>Regular Grammar</string>
           </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalGr1">
-      <item>
-       <widget class="QLabel" name="grammarLabel">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Regular Grammar</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalGr1">
-        <item>
-         <widget class="QPushButton" name="importGrammarButton">
-          <property name="font">
-           <font>
-            <pointsize>10</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Import Grammar</string>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="exportGrammarButton">
-          <property name="font">
-           <font>
-            <pointsize>10</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Export Grammar</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="convertGrammarButton">
-          <property name="font">
-           <font>
-            <pointsize>10</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Convert To Automata</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalGr2">
-        <item>
-         <widget class="QListWidget" name="productionList"/>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalGr2">
+         <layout class="QHBoxLayout" name="horizontalGr1">
           <item>
-           <widget class="QPushButton" name="addProdButton">
+           <widget class="QPushButton" name="importGrammarButton">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
             <property name="text">
-             <string>Add Production</string>
+             <string>Import Grammar</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="removeProdButton">
+           <widget class="QPushButton" name="exportGrammarButton">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
             <property name="text">
-             <string>Remove Production</string>
+             <string>Export Grammar</string>
             </property>
            </widget>
           </item>
           <item>
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
+           <widget class="QPushButton" name="convertGrammarButton">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
             </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
+            <property name="text">
+             <string>Convert To Automata</string>
             </property>
-           </spacer>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalGr2">
+          <item>
+           <widget class="QListWidget" name="productionList"/>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalGr2">
+            <item>
+             <widget class="QPushButton" name="addProdButton">
+              <property name="text">
+               <string>Add Production</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="removeProdButton">
+              <property name="text">
+               <string>Remove Production</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
@@ -391,7 +447,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>545</width>
+     <width>800</width>
      <height>22</height>
     </rect>
    </property>

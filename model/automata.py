@@ -139,7 +139,37 @@ class Automata():
         self.states = newStates
         self.final_states = newFinalStates
         self.transitions = newTransitions
-        self.rename_states()
+
+    def minimize(self):
+        pass
+
+    def union(self, other):
+        pass
+
+    def reverse(self):
+        pass
+    
+    def closure(self):
+        pass
+
+    def concatenation(self, other):
+        pass
+
+    def complement(self):
+        pass
+
+    def complete(self):
+        #funnction to put the error state
+        pass
+
+    def intersection(self, other):
+        pass
+
+    def difference(self, other):
+        pass
+
+    def convert_to_grammar(self):
+        pass
 
     def rename_states(self):
         i = int(1)
@@ -155,13 +185,11 @@ class Automata():
             state = state.replace('}', '')
             if state != 'q0':
                 newState = 'q' + str(i)
-                statesMap[state] = newState
+                statesMap['{'+state+'}'] = newState
                 newStates.add(newState)
                 i += 1
 
         for state in self.states:
-            state = state.replace('{', '')
-            state = state.replace('}', '')
             for symbol in self.symbols:
                 try:
                     for t in self.transitions[state, symbol]:
@@ -197,6 +225,15 @@ class Automata():
 
         else:
             raise ValueError('Not a valid file!')
+
+    def copy(self):
+        new_automata = Automata()
+        new_automata.symbols = self.symbols.copy()
+        new_automata.states = self.states.copy()
+        new_automata.final_states = self.final_states.copy()
+        new_automata.transitions = self.transitions.copy()
+        new_automata.initial_state = self.initial_state
+        return new_automata
 
     def __str__(self):
         symbols = 'symbol: ' + str(self.symbols) + '\n'

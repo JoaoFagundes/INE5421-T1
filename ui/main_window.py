@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QMessageBox, QInputDialog, QFileDialog, QTableWidgetItem)
 
 SYMBOL_INPUT='(([a-z0-9],)?)*[a-z0-9]'
-STATE_INPUT='(([q][0-9]*,)?)*q[0-9]*'
+STATE_INPUT='(([q][0-9]*,)?)*q[0-9]*|qErro'
 INITIAL_GRAMMAR='[A-Z][\']*->[a-z0-9&]([A-Z][\']*)?(\|[a-z0-9&]([A-Z][\']*)?)*'
 GRAMMAR_INPUT='[A-Z][\']*->[a-z0-9]([A-Z][\']*)?(\|[a-z0-9]([A-Z][\']*)?)*'
 
@@ -23,6 +23,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._regex = Regex()
         self._automata = Automata()
         self._grammar = Grammar()
+        self._automata_list = list()
         self._item_data = ''
         self._table_data = ''
 
@@ -56,6 +57,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.productionList.itemDoubleClicked.connect(self.grammar_item_double_clicked)
         self.productionList.itemChanged.connect(self.update_grammar)
 
+        #Automata List
+        self.automataList.itemDoubleClicked.connect(self.automata_list_double_clicked)
+
         #Operations
         self.actionIntersection.triggered.connect(self.intersection_action)
         self.actionDifference.triggered.connect(self.difference_action)
@@ -65,6 +69,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionUnion.triggered.connect(self.union_action)
         self.actionConcatenation.triggered.connect(self.concatenation_action)
         self.actionClosure.triggered.connect(self.closure_action)
+
+    def add_automata_to_list(self):
+        if self.transitionTable.rowCount() != 0 and self.transitionTable.columnCount() != 0:
+            text, ok = QInputDialog.getText(self, 'Replace Automata', 'You are going to '+
+                            'replace the current automata, give it a name or cancel to '+
+                            'not add it to the list: ')
+            if ok:
+                new_automata = self._automata.copy()
+                self._automata_list.append(new_automata)
+                self.automataList.addItem(text)
+
+    def automata_list_double_clicked(self, item):
+        self.add_automata_to_list()
+        index = self.automataList.row(item)
+        self._automata = self._automata_list[index]
+        self.update_transition_table()
 
     def import_regex(self):
         path, _ = QFileDialog.getOpenFileName(self)
@@ -84,6 +104,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self._regex.save(path)
 
     def convert_regex(self):
+        self.add_automata_to_list()
         self.message.setText('Not implemented yet!')
         self.message.show()
 
@@ -116,6 +137,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 automata = Automata()
                 automata.load(path)
                 if self.validate_finite_automata(automata):
+                    self.add_automata_to_list()
                     self._automata = automata
                     self.update_transition_table()
                 else:
@@ -216,7 +238,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.update_transition_table()
 
     def determinize_action(self):
+        self.add_automata_to_list()
         self._automata.determinize()
+        #self._automata.rename_states()
         self.update_transition_table()
 
     def enumerate_strings(self):
@@ -342,6 +366,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self._grammar.save(path)
 
     def convert_grammar(self):
+        self.add_automata_to_list()
         self.message.setText('Not implemented yet!')
         self.message.show()
 
