@@ -100,15 +100,18 @@ class Automata():
         newFinalStates = set()
         newInitialState = '{' + self.initial_state + '}'
         newStates.add(newInitialState)
+        if self.initial_state in self.final_states:
+            newFinalStates.add(newInitialState)
+        
         statesToDeterminize.append(newInitialState)
         self.initial_state = newInitialState
 
         for state in statesToDeterminize:
-            isFinalState = False
             state = state[:-1]
             state = state.replace('{', '')
             state = state.replace(' ', '')
             for symbol in self.symbols:
+                isFinalState = False
                 newState = '{'
                 determinization = set()
 
@@ -139,29 +142,32 @@ class Automata():
         self.states = newStates
         self.final_states = newFinalStates
         self.transitions = newTransitions
-        self.rename_states()
 
     def rename_states(self):
         i = int(1)
         statesMap = dict()
         newStates = set()
+        newFinalStates = set()
         newTransitions = dict()
-        statesMap[self.initial_state] = 'q0'
-        self.initial_state = 'q0'
-        newStates.add(self.initial_state)
+        newInitialState = 'q0'
+        statesMap[self.initial_state] = newInitialState
+        if self.initial_state in self.final_states:
+            newFinalStates.add(newInitialState)
+        self.initial_state = newInitialState
+        newStates.add(newInitialState)
 
         for state in self.states:
             state = state.replace('{', '')
             state = state.replace('}', '')
             if state != 'q0':
                 newState = 'q' + str(i)
-                statesMap[state] = newState
+                statesMap['{' + state + '}'] = newState
                 newStates.add(newState)
                 i += 1
 
         for state in self.states:
-            state = state.replace('{', '')
-            state = state.replace('}', '')
+            if state in self.final_states:
+                newFinalStates.add(statesMap[state])
             for symbol in self.symbols:
                 try:
                     for t in self.transitions[state, symbol]:
@@ -171,6 +177,7 @@ class Automata():
 
         self.transitions = newTransitions
         self.states = newStates
+        self.final_states = newFinalStates
 
     def save(self, path):
         data = {}
