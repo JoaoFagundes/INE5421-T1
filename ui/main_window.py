@@ -240,7 +240,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def determinize_action(self):
         self.add_automata_to_list()
         self._automata.determinize()
-        #self._automata.rename_states()
+        self._automata.rename_states()
         self.update_transition_table()
 
     def enumerate_strings(self):
