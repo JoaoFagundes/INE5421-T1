@@ -22,7 +22,9 @@ class Grammar():
         self.add(new_key, set_values)
 
     def convert_to_automata(self):
-        pass
+        from .automata import Automata
+        automata = Automata()
+        return automata
 
     def save(self, path):
         data = {}

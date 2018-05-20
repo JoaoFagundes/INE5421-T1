@@ -104,6 +104,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self._regex.save(path)
 
     def convert_regex(self):
+        print(self._automata)
         self.add_automata_to_list()
         self.message.setText('Not implemented yet!')
         self.message.show()
@@ -152,7 +153,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self._automata.save(path)
 
     def convert_automata(self):
-        print(self._automata)
+        if self.transitionTable.rowCount() != 0 and self.transitionTable.columnCount() != 0:
+            self._grammar = self._automata.convert_to_grammar()
+            self.update_grammar_list()
 
     def add_state(self):
         text, ok = QInputDialog.getText(
@@ -201,6 +204,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
             for symbol in text.split(','):
                 self._automata.add_symbol(symbol)
+                for state in self._automata.states:
+                    self._automata.transitions[state, symbol] = set()
                 self.update_transition_table()
 
     def remove_symbol(self):
@@ -367,8 +372,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def convert_grammar(self):
         self.add_automata_to_list()
-        self.message.setText('Not implemented yet!')
-        self.message.show()
+        self._automata = self._grammar.convert_to_automata()
+        self.update_transition_table()
 
     def add_production(self):
         keys = self._grammar.productions.keys()
@@ -463,6 +468,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.productionList.itemChanged.connect(self.update_grammar)
 
     def update_grammar_list(self):
+        self.productionList.clear()
         for k, v in self._grammar.productions.items():
             text = k + '->'
             for p in v:

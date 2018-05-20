@@ -1,4 +1,5 @@
 import json
+import string
 
 class Automata():
 
@@ -171,7 +172,42 @@ class Automata():
         pass
 
     def convert_to_grammar(self):
-        pass
+        from .grammar import Grammar
+        grammar = Grammar()
+        map_state_letter = dict()
+        suffix = ''
+        for i, state in enumerate(self.states):
+            if i != 0 and i % 26 == 0:
+                suffix += '\''
+            map_state_letter[state] = string.ascii_uppercase[i]+suffix
+
+        initial_productions = set()
+        for s in self.symbols:
+            aux_states = self.transitions[self.initial_state, s]
+            if aux_states != set():
+                for aux_state in aux_states:
+                    if aux_state in self.final_states:
+                        initial_productions.add(s)
+                    initial_productions.add(s+map_state_letter[aux_state])
+
+        if self.initial_state in self.final_states:
+            new_initial_productions = initial_productions.copy()
+            new_initial_productions.add('&')
+            grammar.add(map_state_letter[self.initial_state]+'\'', new_initial_productions)
+        grammar.add(map_state_letter[self.initial_state], initial_productions)
+
+        for state in self.states - {self.initial_state}:
+            productions = set()
+            for s in self.symbols:
+                aux_states = self.transitions[state, s]
+            if aux_states != set():
+                for aux_state in aux_states:
+                    if aux_state in self.final_states:
+                        productions.add(s)
+                    productions.add(s+map_state_letter[aux_state])
+            grammar.add(map_state_letter[state], productions)
+        
+        return grammar
 
     def rename_states(self):
         i = int(1)
