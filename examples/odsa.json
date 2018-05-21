@@ -1,0 +1,30 @@
+{
+    "object": "automata",
+    "symbols": [
+        "a"
+    ],
+    "states": [
+        "q0",
+        "q1"
+    ],
+    "initial_state": "q0",
+    "final_states": [
+        "q1"
+    ],
+    "transitions": [
+        [
+            "q1",
+            "a",
+            [
+                "q0"
+            ]
+        ],
+        [
+            "q0",
+            "a",
+            [
+                "q1"
+            ]
+        ]
+    ]
+}
