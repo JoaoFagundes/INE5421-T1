@@ -483,8 +483,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.productionList.addItem(text[:-1])
 
     def intersection_action(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
+        try:
+            item_text = self.automataList.selectedItems()[0].text()
+            message = ('Intersection will be made with the current automata and the selected '+
+                    'automata from the list: ' + item_text + '.')
+            ok = QMessageBox.question(self, 'Select Automata', message, 
+                                    QMessageBox.Yes, QMessageBox.No)
+            if ok == QMessageBox.Yes:
+                self.add_automata_to_list()
+                other_automata = self._automata_list[self.automataList.currentRow()].copy()
+                (o, s, u) = self._automata.intersection(other_automata)
+                self.automataList.addItem(item_text+'Complement')
+                self.automataList.addItem('oldAutomataComplement')
+                self.automataList.addItem('middleComplementUnion')
+                self._automata_list.append(o)
+                self._automata_list.append(s)
+                self._automata_list.append(u)
+                self.update_transition_table()
+        
+        except IndexError:
+            self.message.setText('To use intersection operation you need a automata in '+
+                                 'the table and other selected from the automata list!')
+            self.message.show()
 
     def difference_action(self):
         self.message.setText('Not implemented yet!')

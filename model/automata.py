@@ -218,7 +218,14 @@ class Automata():
                 self.transitions['qErro', s] = {'qErro'}
 
     def intersection(self, other):
-        pass
+        other.complement()
+        complement1 = other.copy()
+        self.complement()
+        complement2 = self.copy()
+        self.union(complement1.copy())
+        union = self.copy()
+        self.complement()
+        return(complement1, complement2, union)
 
     def difference(self, other):
         pass
