@@ -179,6 +179,102 @@ class Automata():
         self.states = newStates
         self.final_states = newFinalStates
 
+    def minimize(self):
+        if self.determinization_is_needed:
+            self.determinize()
+            self.rename_states()
+        
+        self.discard_unreachable_states()
+        self.discard_dead_states()
+        self.discard_equivalent_states()
+
+    def discard_unreachable_states(self):
+        reachable_states = list()
+        reachable_states.append(self.initial_state)
+
+        for state in reachable_states:
+            for symbol in self.symbols:
+                for st in self.transitions[state, symbol]:
+                    if st not in reachable_states:
+                        reachable_states.append(st)
+
+        for state in self.states.copy():
+            if state not in reachable_states:
+                self.states.discard(state)
+    
+    def discard_dead_states(self):
+        living_states = self.final_states.copy()
+        new_living_states = set()
+
+        while (True):
+            aux = new_living_states.copy()
+            new_living_states = {k[0] for k, v in self.transitions.items() if v & living_states != set()}
+            for state in new_living_states:
+                living_states.add(state)
+        
+            if aux == new_living_states:
+                break
+
+
+        for k, v in self.transitions.copy().items():
+            if v & living_states == set():
+                self.states = self.states - v
+                self.transitions.pop(k)
+
+    def discard_equivalent_states(self):
+        equivalence_classes = dict()
+        i = int(2)
+        equivalence_classes['q0'] = self.states - self.final_states
+        equivalence_classes['q1'] = self.final_states
+        copy = dict()
+        
+        while True:
+            copy = equivalence_classes.copy()
+            for k, v in equivalence_classes.copy().items():
+                extras = self.combine_states(v, equivalence_classes)
+                
+                while (len(extras) > 1):
+                    equivalence_classes['q' + i] = extras
+                    i += int(1)
+                    extras = self.combine_states(extras, equivalence_classes)
+                else:
+                    if len(extras) == 1:
+                        equivalence_classes['q' + i] = extras
+            
+            if (copy == equivalence_classes):
+                break
+    
+    def combine_states(self, _class, equivalence_classes):
+        extras = set()
+        q = _class.pop()
+        _class.add(q)
+        subclass = _class - {q}
+        for p in subclass:
+            for symbol in self.symbols:
+                r1 = self.transitions[q, symbol].copy().pop()
+                r2 = self.transitions[p, symbol].copy().pop()
+                if not self.in_same_classes(r1, r2, equivalence_classes):
+                    equivalence_classes[_class].discard(p)
+                    extras.add(p)
+        return extras
+
+    def in_same_classes(self, q1, q2, equivalence_classes):
+        for eq_class in equivalence_classes.values():
+            if (({q1, q2} & eq_class) == {q1, q2}):
+                return True
+        
+        return False
+
+
+    
+    def determinization_is_needed(self):
+        for state in self.states:
+            for transition in self.transitions[state, self.symbols]:
+                if len(transition) > 1:
+                    return True
+
+        return False
+    
     def save(self, path):
         data = {}
         data['object'] = 'automata'

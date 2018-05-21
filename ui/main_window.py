@@ -220,6 +220,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._automata.rename_states()
         self.update_transition_table()
 
+    def minimize_action(self):
+        self._automata.minimize()
+
+        self.update_transition_table()
+
     def enumerate_strings(self):
         n, ok = QInputDialog.getInt(
             self, 'Enumerate', 'Which size of sentence')
@@ -454,10 +459,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.message.show()
 
     def reverse_action(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
-
-    def minimize_action(self):
         self.message.setText('Not implemented yet!')
         self.message.show()
 
