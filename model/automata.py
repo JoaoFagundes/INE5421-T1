@@ -167,11 +167,21 @@ class Automata():
         pass
 
     def complement(self):
-        pass
+        self.determinize()
+        self.rename_states()
+        self.complete()
+        self.final_states = self.states - self.final_states
 
     def complete(self):
         #funnction to put the error state
-        pass
+        for k, v in self.transitions.items():
+            if v == set():
+                self.states.add('qErro')
+                self.transitions[k] = {'qErro'}
+
+        if 'qErro' in self.states:
+            for s in self.symbols:
+                self.transitions['qErro', s] = {'qErro'}
 
     def intersection(self, other):
         pass

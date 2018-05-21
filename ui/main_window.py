@@ -69,6 +69,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionUnion.triggered.connect(self.union_action)
         self.actionConcatenation.triggered.connect(self.concatenation_action)
         self.actionClosure.triggered.connect(self.closure_action)
+        self.actionComplement.triggered.connect(self.complement)
 
     def add_automata_to_list(self):
         if self.transitionTable.rowCount() != 0 and self.transitionTable.columnCount() != 0:
@@ -508,3 +509,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def closure_action(self):
         self.message.setText('Not implemented yet!')
         self.message.show()
+
+    def complement(self):
+        self.add_automata_to_list()
+        self._automata.complement()
+        self.update_transition_table()

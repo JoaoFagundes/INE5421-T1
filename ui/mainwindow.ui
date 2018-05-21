@@ -461,6 +461,7 @@
     <addaction name="actionIntersection"/>
     <addaction name="actionDifference"/>
     <addaction name="actionReverse"/>
+    <addaction name="actionComplement"/>
    </widget>
    <widget class="QMenu" name="menuFinite_Automata_Operations">
     <property name="title">
@@ -510,6 +511,11 @@
   <action name="actionClosure">
    <property name="text">
     <string>Closure</string>
+   </property>
+  </action>
+  <action name="actionComplement">
+   <property name="text">
+    <string>Complement</string>
    </property>
   </action>
  </widget>
