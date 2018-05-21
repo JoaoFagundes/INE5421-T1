@@ -228,7 +228,10 @@ class Automata():
         return(complement1, complement2, union)
 
     def difference(self, other):
-        pass
+        other.complement()
+        complement1 = other.copy()
+        self.intersection(complement1.copy())
+        return complement1
 
     def convert_to_grammar(self):
         from .grammar import Grammar

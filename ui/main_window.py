@@ -507,8 +507,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.message.show()
 
     def difference_action(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
+        try:
+            item_text = self.automataList.selectedItems()[0].text()
+            message = ('Difference will be made with the current automata - selected '+
+                    'automata from the list: ' + item_text + '.')
+            ok = QMessageBox.question(self, 'Select Automata', message, 
+                                    QMessageBox.Yes, QMessageBox.No)
+            if ok == QMessageBox.Yes:
+                self.add_automata_to_list()
+                other_automata = self._automata_list[self.automataList.currentRow()].copy()
+                o = self._automata.difference(other_automata)
+                self.automataList.addItem(item_text+'Complement')
+                self._automata_list.append(o)
+                self.update_transition_table()
+        
+        except IndexError:
+            self.message.setText('To use intersection operation you need a automata in '+
+                                 'the table and other selected from the automata list!')
+            self.message.show()
 
     def reverse_action(self):
         self.message.setText('Not implemented yet!')
