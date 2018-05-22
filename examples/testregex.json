@@ -1,0 +1,4 @@
+{
+    "object": "regex",
+    "regex_string": "(ab|ac)*a?|(ba?c)*"
+}

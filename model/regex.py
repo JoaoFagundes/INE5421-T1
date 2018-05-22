@@ -1,4 +1,44 @@
 import json
+import re
+from collections import deque
+
+TERMINAL_SYMBOLS = '[a-z0-9]'
+
+class Node():
+
+    def __init__(self, symbol, left_str, right_str):
+        self.symbol = symbol
+        self.left = left_str
+        self.right = right_str
+
+    def print_tree_by_level(self, root):
+        buf = deque()
+        output = []
+        if not root:
+            print('$')
+        else:
+            buf.append(root)
+            count, nextCount = 1, 0
+            while count:
+                node = buf.popleft()
+                if node:
+                    output.append(node.symbol)
+                    count -= 1
+                    for n in (node.left, node.right):
+                        if n:
+                            buf.append(n)
+                            nextCount += 1
+                        else:
+                            buf.append(None)
+                else:
+                    output.append('$')
+                if not count:
+                    print(output)
+                    output = []
+                    count, nextCount = nextCount, 0
+            # print the remaining all empty leaf node part
+            output.extend(['$']*len(buf))
+            print(output)
 
 class RegexParser():
     """
@@ -22,10 +62,8 @@ class RegexParser():
         A factor is a base followed by a possibly empty sequence of '*'.
              
         <base>   ::= <char>
-                    | '\' <char>
                     | '(' <regex> ')'
         A base is a character, 
-        or an escaped character, 
         or a parenthesized regular expression.        
     """
 
@@ -33,13 +71,18 @@ class RegexParser():
         self.regex_string = regex_string
 
     def parse(self):
-        pass
+        print(self.regex_string)
+        tree = self.regex()
+        if len(self.regex_string) != 0:
+            raise ValueError('Not a valid regex!')
+
+        return tree
 
     def peek(self):
         if self.more():
             return self.regex_string[0]
-        else:
-            return ''
+        
+        return ''
 
     def eat(self, char):
         if self.peek() == char:
@@ -60,16 +103,56 @@ class RegexParser():
         return True
 
     def regex(self):
-        pass
+        """
+            <regex>  ::= <term>'|'<regex>
+                        | <term>
+        """
+        term = self.term()
+        if self.more() and self.peek() == '|':
+            self.eat('|')
+            regex = self.regex()
+            return Node('|', term, regex)
+        
+        return term
 
     def term(self):
-        pass
+        """
+            <term>   ::= { <factor> }
+            ou
+            <term>   ::= <factor> <term> | <factor>
+        """
+        factor = self.factor()
+        if self.more() and self.peek() != ')' and self.peek() != '|':
+            term = self.term()
+            factor = Node('.', factor, term)
+
+        return factor 
 
     def factor(self):
-        pass
+        """
+            <factor> ::= <base> { '*' }
+        """
+        base = self.base()
+        while self.more() and (self.peek() == '*' or self.peek() == '?'):
+            base = Node(self.next_char(), base, None)
+
+        return base
 
     def base(self):
-        pass
+        """
+            <base>   ::= <char>
+                        | '(' <regex> ')'
+        """
+        char = self.peek()
+        if char == '(':
+            self.eat('(')
+            regex = self.regex()
+            self.eat(')')
+            return regex
+        elif re.fullmatch(TERMINAL_SYMBOLS, char) is not None:
+            return Node(self.next_char(), None, None)
+        else:
+            raise ValueError('Not a valid regex!')
 
 class Regex():
 
@@ -77,7 +160,8 @@ class Regex():
         self.string = regex_string
 
     def convert_to_automata(self):
-        pass
+        tree = RegexParser(self.string).parse()
+        tree.print_tree_by_level(tree)
 
     def save(self, path):
         data = {}

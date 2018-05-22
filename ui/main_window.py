@@ -105,10 +105,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self._regex.save(path)
 
     def convert_regex(self):
-        print(self._automata)
-        self.add_automata_to_list()
-        self.message.setText('Not implemented yet!')
-        self.message.show()
+        regex_string = self.regexInput.text()
+        self._regex = Regex(regex_string)
+        self._regex.convert_to_automata()
 
     def validate_finite_automata(self, automata):
         if re.fullmatch(STATE_INPUT, automata.initial_state) is None:

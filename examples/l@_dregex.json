@@ -1,4 +1,4 @@
 {
     "object": "regex",
-    "regex_string": "(l|@(_@)*_?(l|d))(@?(_@)*_?(l|d))*"
+    "regex_string": "(l|a(ua)*u?(l|d))(a?(ua)*u?(l|d))*"
 }
