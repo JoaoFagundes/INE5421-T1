@@ -12,33 +12,33 @@ class Node():
         self.right = right_str
 
     def print_tree_by_level(self, root):
-        buf = deque()
-        output = []
-        if not root:
-            print('$')
-        else:
-            buf.append(root)
-            count, nextCount = 1, 0
-            while count:
-                node = buf.popleft()
-                if node:
-                    output.append(node.symbol)
-                    count -= 1
-                    for n in (node.left, node.right):
-                        if n:
-                            buf.append(n)
-                            nextCount += 1
-                        else:
-                            buf.append(None)
+        level = [root]
+        level_symbols = [i.symbol for i in level]
+        print('Level: '+str(level_symbols))
+        while len(level) > 0:
+            new_level = list()
+            for i in level:
+                if i is None:
+                    new_level.append(None)
+                    new_level.append(None)
                 else:
-                    output.append('$')
-                if not count:
-                    print(output)
-                    output = []
-                    count, nextCount = nextCount, 0
-            # print the remaining all empty leaf node part
-            output.extend(['$']*len(buf))
-            print(output)
+                    new_level.append(i.left)
+                    new_level.append(i.right)
+
+            level = new_level.copy()
+            level_symbols.clear()
+            count = 0
+            for i in level:
+                if i is None:
+                    count += 1
+                    level_symbols.append('$')
+                else:
+                    level_symbols.append(i.symbol)
+
+            if len(level) == count:
+                return
+
+            print('Level: '+str(level_symbols))
 
 class RegexParser():
     """
@@ -57,7 +57,7 @@ class RegexParser():
 
         A term is a possibly empty sequence of factors.
 
-        <factor> ::= <base> { '*' }
+        <factor> ::= <base> ({ '*' } | { '?' })
 
         A factor is a base followed by a possibly empty sequence of '*'.
              
@@ -130,7 +130,7 @@ class RegexParser():
 
     def factor(self):
         """
-            <factor> ::= <base> { '*' }
+            <factor> ::= <base> ({ '*' } | { '?' })
         """
         base = self.base()
         while self.more() and (self.peek() == '*' or self.peek() == '?'):
