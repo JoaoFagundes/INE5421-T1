@@ -1,6 +1,5 @@
 import json
 import re
-from collections import deque
 
 TERMINAL_SYMBOLS = '[a-z0-9]'
 OPERATORS = {'|', '?', '*', '.'}
@@ -31,12 +30,12 @@ class Node():
 
     def down(self, visited=None):
         if visited is None:
-            visisted = set()
+            visited = set()
 
         if self in visited:
             return {self} if self.symbol not in OPERATORS else set()
 
-        visited |= self
+        visited |= {self}
         if self.symbol == '|':
             return self.left.down(visited) | self.right.down(visited)
         elif self.symbol == '?':
@@ -48,11 +47,23 @@ class Node():
 
         return {self}
 
-    def thread(self, root):
-        pass
+    def thread(self):
+        inorder = list()
+        node = self
+        while inorder or node:
+            if node:
+                inorder.append(node)
+                node = node.left
+            else:
+                node = inorder.pop()
+                if node.right is None:
+                    node.right = inorder[-1] if inorder else Node('$', None, None)
+                    node = None
+                else:
+                    node = node.right
 
-    def print_tree_by_level(self, root):
-        level = [root]
+    def print_tree_by_level(self):
+        level = [self]
         level_symbols = [i.symbol for i in level]
         print('Level: '+str(level_symbols))
         while len(level) > 0:
@@ -200,8 +211,67 @@ class Regex():
         self.string = regex_string
 
     def convert_to_automata(self):
+        from .automata import Automata
+        automata = Automata()
         tree = RegexParser(self.string).parse()
-        tree.print_tree_by_level(tree)
+        tree.thread() 
+
+        i_states = 0
+        next_states = set()
+
+        automata.initial_state = 'q'+str(i_states)
+        automata.states.add(automata.initial_state)
+
+        composition = frozenset(tree.down())  
+        state_composition = dict()
+
+        next_states.add(automata.initial_state)
+        state_composition[automata.initial_state] = composition
+
+        while next_states:
+            current_state = next_states.pop()
+            composition_symbol_nodes = dict()
+            for c in state_composition[current_state]:
+                if c.symbol not in composition_symbol_nodes.keys():
+                    composition_symbol_nodes[c.symbol] = {c}
+                else:
+                    nodes = composition_symbol_nodes[c.symbol]
+                    nodes.add(c)
+                    composition_symbol_nodes[c.symbol] = nodes
+
+            for k_symbol in composition_symbol_nodes.keys():
+                if k_symbol == '$':
+                    automata.final_states.add(current_state)
+                else:
+                    automata.symbols.add(k_symbol)
+                    new_composition = set()
+                    for c in composition_symbol_nodes[k_symbol]:
+                        new_composition |= c.right.up()
+
+                    frozen_composition = frozenset(new_composition)
+                    already_in = False
+                    for k_state, v in state_composition.items():                     
+                        if v == frozen_composition:
+                            automata.transitions[(current_state, k_symbol)] = {k_state}
+                            already_in = True
+
+                    if not already_in:
+                        i_states += 1
+                        new_state = 'q'+str(i_states)
+                        automata.states.add(new_state)
+                        next_states.add(new_state)
+                        automata.transitions[(current_state, k_symbol)] = {new_state}
+                        state_composition[new_state] = frozen_composition
+
+        for s in automata.symbols:
+            for state in automata.states:
+                try:
+                    test = automata.transitions[state, s]
+                except KeyError:
+                    automata.transitions[state, s] = set()
+
+        return automata
+        
 
     def save(self, path):
         data = {}

@@ -107,7 +107,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def convert_regex(self):
         regex_string = self.regexInput.text()
         self._regex = Regex(regex_string)
-        self._regex.convert_to_automata()
+        self.add_automata_to_list()
+        self._automata = self._regex.convert_to_automata()
+        self.update_transition_table()
 
     def validate_finite_automata(self, automata):
         if re.fullmatch(STATE_INPUT, automata.initial_state) is None:
