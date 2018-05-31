@@ -3,6 +3,7 @@ import re
 from collections import deque
 
 TERMINAL_SYMBOLS = '[a-z0-9]'
+OPERATORS = {'|', '?', '*', '.'}
 
 class Node():
 
@@ -10,6 +11,45 @@ class Node():
         self.symbol = symbol
         self.left = left_str
         self.right = right_str
+
+    def up(self, visited=None):
+        if visited is None:
+            visited = set()
+
+        if self.symbol == '.':
+            return self.right.down(visited)
+        elif self.symbol == '*':
+            return self.left.down(visited) | self.right.up(visited)
+        elif self.symbol == '?':
+            return self.right.up(visited)
+        elif self.symbol == '|':
+            node = self.right
+            while node.symbol == '.' or node.symbol == '|':
+                node = node.right
+            return node.right.up(visited)
+        return {self}
+
+    def down(self, visited=None):
+        if visited is None:
+            visisted = set()
+
+        if self in visited:
+            return {self} if self.symbol not in OPERATORS else set()
+
+        visited |= self
+        if self.symbol == '|':
+            return self.left.down(visited) | self.right.down(visited)
+        elif self.symbol == '?':
+            return self.left.down(visited) | self.right.up(visited)
+        elif self.symbol == '*':
+            return self.left.down(visited) | self.right.up(visited)
+        elif self.symbol == '.':
+            return self.left.down(visited)
+
+        return {self}
+
+    def thread(self, root):
+        pass
 
     def print_tree_by_level(self, root):
         level = [root]
