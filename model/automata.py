@@ -92,6 +92,15 @@ class Automata():
         accepted_strings = {s[1] for s in maybe_accepted_strings if s[0] == self.initial_state}
         return accepted_strings
 
+    def empty_language_automata(self):
+        self.initial_state = 'q0'
+        self.states = {self.initial_state}
+        self.final_states = set()
+        self.transitions = dict()
+        for s in self.symbols:
+            self.transitions[self.initial_state, s] = {self.initial_state}
+        
+
     def determinize(self):
         statesToDeterminize = list()
 
@@ -186,7 +195,10 @@ class Automata():
         
         self.discard_unreachable_states()
         self.discard_dead_states()
-        self.discard_equivalent_states()
+        if self.initial_state not in self.states:
+            self.empty_language_automata()
+        else:
+            self.discard_equivalent_states()
 
     def discard_unreachable_states(self):
         reachable_states = list()
