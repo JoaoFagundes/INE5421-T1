@@ -94,6 +94,15 @@ class Automata():
         accepted_strings = {s[1] for s in maybe_accepted_strings if s[0] == self.initial_state}
         return accepted_strings
 
+    def empty_language_automata(self):
+        self.initial_state = 'q0'
+        self.states = {self.initial_state}
+        self.final_states = set()
+        self.transitions = dict()
+        for s in self.symbols:
+            self.transitions[self.initial_state, s] = {self.initial_state}
+        
+
     def determinize(self):
         statesToDeterminize = list()
 
@@ -318,6 +327,159 @@ class Automata():
         self.states = newStates
         self.final_states = newFinalStates
 
+    def minimize(self):
+        if self.determinization_is_needed():
+            self.determinize()
+            self.rename_states()
+        
+        self.discard_unreachable_states()
+        self.discard_dead_states()
+        if self.initial_state not in self.states:
+            self.empty_language_automata()
+        else:
+            self.create_phi_state()
+            self.discard_equivalent_states()
+
+    def discard_unreachable_states(self):
+        reachable_states = list()
+        reachable_states.append(self.initial_state)
+
+        for state in reachable_states:
+            for symbol in self.symbols:
+                for st in self.transitions[state, symbol]:
+                    if st not in reachable_states:
+                        reachable_states.append(st)
+
+        unreachable_states = {state for state in self.states.copy() if state not in reachable_states}
+        self.states = self.states - unreachable_states
+    
+    def discard_dead_states(self):
+        living_states = self.final_states.copy()
+        new_living_states = set()
+
+        while (True):
+            aux = new_living_states.copy()
+            new_living_states = {k[0] for k, v in self.transitions.items() if v & living_states != set()}
+            for state in new_living_states:
+                living_states.add(state)
+        
+            if aux == new_living_states:
+                break
+
+
+        for k, v in self.transitions.copy().items():
+            if v & living_states == set():
+                self.states = self.states - v
+                self.transitions.pop(k)
+
+    def create_phi_state(self):
+        phi_state = 'qPhi'
+        phi_needed = False
+        error_transitions = list()
+        for state in self.states:
+            for symbol in self.symbols:
+                try:
+                    if self.transitions[state, symbol] == set():
+                        pass
+                except KeyError:
+                    error_transitions.append([state, symbol])
+                        
+
+        for k in error_transitions:
+            phi_needed = True
+            self.transitions[k[0], k[1]] = {phi_state}
+
+        if phi_needed:
+            self.states.add(phi_state)
+            for symbol in self.symbols:
+                self.transitions[phi_state, symbol] = {phi_state}
+     
+    def discard_equivalent_states(self):
+        equivalence_classes = dict()
+        i = int(2)
+        equivalence_classes['q0'] = self.states - self.final_states
+        equivalence_classes['q1'] = self.final_states
+        copy = dict()
+        
+        while True:
+            copy = equivalence_classes.copy()
+            for k, v in copy.items():
+                extras = self.combine_states(k, v, copy)
+                
+                while (len(extras) > 1):
+                    state = 'q' + str(i)
+                    equivalence_classes[state] = extras
+                    i += int(1)
+                    extras = self.combine_states(state, extras, copy)
+                else:
+                    if len(extras) == 1:
+                        state = 'q' + str(i)
+                        equivalence_classes[state] = extras
+                        i += int(1)
+            
+            if (copy == equivalence_classes):
+                break
+
+        self.create_minimum_automata(equivalence_classes)
+    
+    def combine_states(self, key, _class, equivalence_classes):
+        extras = set()
+        q = _class.pop()
+        subclass = _class.copy()
+        _class.add(q)
+        for p in subclass:
+            for symbol in self.symbols:
+                r1 = self.transitions[q, symbol].copy().pop()
+                r2 = self.transitions[p, symbol].copy().pop()
+                if not self.in_same_classes(r1, r2, equivalence_classes):
+                    equivalence_classes[key].discard(p)
+                    extras.add(p)
+        return extras
+
+    def in_same_classes(self, q1, q2, equivalence_classes):
+        for eq_class in equivalence_classes.values():
+            if (({q1, q2} & eq_class) == {q1, q2}):
+                return True
+        
+        return False
+
+    def create_minimum_automata(self, equivalence_classes):
+        new_transitions = dict()
+        new_states = set()
+        new_final_states = set()
+
+        for k, v in self.transitions.items():
+            state_origin = None
+            state_destination = None
+            for new_state, equivalent_states in equivalence_classes.items():
+                if k[0] in equivalent_states:
+                    state_origin = new_state
+                
+                if v & equivalent_states != set():
+                    state_destination = new_state
+            new_transitions[state_origin, k[1]] = {state_destination}
+
+        for new_state, equivalent_states in equivalence_classes.items():
+            new_states.add(new_state)
+            if self.initial_state in equivalent_states:
+                self.initial_state = new_state
+                
+            for state in equivalent_states:
+                if state in self.final_states:
+                    new_final_states.add(new_state)
+
+        self.states = new_states
+        self.final_states = new_final_states
+        self.transitions = new_transitions
+
+    
+    def determinization_is_needed(self):
+        for origin, destination in self.transitions.items():
+            if len(destination) > 1:
+                return True
+
+        return False
+    
     def save(self, path):
         data = {}
         data['object'] = 'automata'
