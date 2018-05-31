@@ -74,7 +74,7 @@ class Automata():
 
         return ((current_states & self.final_states) != set())
 
-    def enumerate(self, n):
+    def enumerate_strings(self, n):
         if n < 0:
             raise ValueError('Must be a natural number')
 
@@ -159,9 +159,6 @@ class Automata():
         self.states = newStates
         self.final_states = newFinalStates
         self.transitions = newTransitions
-
-    def minimize(self):
-        pass
 
     def union(self, other):
         self.symbols.update(other.symbols)
@@ -382,8 +379,7 @@ class Automata():
                     if self.transitions[state, symbol] == set():
                         pass
                 except KeyError:
-                    error_transitions.append([state, symbol])
-                        
+                    error_transitions.append([state, symbol])    
 
         for k in error_transitions:
             phi_needed = True
@@ -471,7 +467,6 @@ class Automata():
         self.states = new_states
         self.final_states = new_final_states
         self.transitions = new_transitions
-
     
     def determinization_is_needed(self):
         for origin, destination in self.transitions.items():
