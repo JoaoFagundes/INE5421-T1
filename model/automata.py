@@ -189,7 +189,7 @@ class Automata():
         self.final_states = newFinalStates
 
     def minimize(self):
-        if self.determinization_is_needed:
+        if self.determinization_is_needed():
             self.determinize()
             self.rename_states()
         
@@ -198,6 +198,7 @@ class Automata():
         if self.initial_state not in self.states:
             self.empty_language_automata()
         else:
+            self.create_phi_state()
             self.discard_equivalent_states()
 
     def discard_unreachable_states(self):
@@ -210,9 +211,8 @@ class Automata():
                     if st not in reachable_states:
                         reachable_states.append(st)
 
-        for state in self.states.copy():
-            if state not in reachable_states:
-                self.states.discard(state)
+        unreachable_states = {state for state in self.states.copy() if state not in reachable_states}
+        self.states = self.states - unreachable_states
     
     def discard_dead_states(self):
         living_states = self.final_states.copy()
@@ -233,6 +233,28 @@ class Automata():
                 self.states = self.states - v
                 self.transitions.pop(k)
 
+    def create_phi_state(self):
+        phi_state = 'qPhi'
+        phi_needed = False
+        error_transitions = list()
+        for state in self.states:
+            for symbol in self.symbols:
+                try:
+                    if self.transitions[state, symbol] == set():
+                        pass
+                except KeyError:
+                    error_transitions.append([state, symbol])
+                        
+
+        for k in error_transitions:
+            phi_needed = True
+            self.transitions[k[0], k[1]] = {phi_state}
+
+        if phi_needed:
+            self.states.add(phi_state)
+            for symbol in self.symbols:
+                self.transitions[phi_state, symbol] = {phi_state}
+     
     def discard_equivalent_states(self):
         equivalence_classes = dict()
         i = int(2)
@@ -242,31 +264,36 @@ class Automata():
         
         while True:
             copy = equivalence_classes.copy()
-            for k, v in equivalence_classes.copy().items():
-                extras = self.combine_states(v, equivalence_classes)
+            for k, v in copy.items():
+                extras = self.combine_states(k, v, copy)
                 
                 while (len(extras) > 1):
-                    equivalence_classes['q' + i] = extras
+                    state = 'q' + str(i)
+                    equivalence_classes[state] = extras
                     i += int(1)
-                    extras = self.combine_states(extras, equivalence_classes)
+                    extras = self.combine_states(state, extras, copy)
                 else:
                     if len(extras) == 1:
-                        equivalence_classes['q' + i] = extras
+                        state = 'q' + str(i)
+                        equivalence_classes[state] = extras
+                        i += int(1)
             
             if (copy == equivalence_classes):
                 break
+
+        self.create_minimum_automata(equivalence_classes)
     
-    def combine_states(self, _class, equivalence_classes):
+    def combine_states(self, key, _class, equivalence_classes):
         extras = set()
         q = _class.pop()
+        subclass = _class.copy()
         _class.add(q)
-        subclass = _class - {q}
         for p in subclass:
             for symbol in self.symbols:
                 r1 = self.transitions[q, symbol].copy().pop()
                 r2 = self.transitions[p, symbol].copy().pop()
                 if not self.in_same_classes(r1, r2, equivalence_classes):
-                    equivalence_classes[_class].discard(p)
+                    equivalence_classes[key].discard(p)
                     extras.add(p)
         return extras
 
@@ -277,13 +304,40 @@ class Automata():
         
         return False
 
+    def create_minimum_automata(self, equivalence_classes):
+        new_transitions = dict()
+        new_states = set()
+        new_final_states = set()
+
+        for k, v in self.transitions.items():
+            state_origin = None
+            state_destination = None
+            for new_state, equivalent_states in equivalence_classes.items():
+                if k[0] in equivalent_states:
+                    state_origin = new_state
+                
+                if v & equivalent_states != set():
+                    state_destination = new_state
+            new_transitions[state_origin, k[1]] = {state_destination}
+
+        for new_state, equivalent_states in equivalence_classes.items():
+            new_states.add(new_state)
+            if self.initial_state in equivalent_states:
+                self.initial_state = new_state
+                
+            for state in equivalent_states:
+                if state in self.final_states:
+                    new_final_states.add(new_state)
+
+        self.states = new_states
+        self.final_states = new_final_states
+        self.transitions = new_transitions
 
     
     def determinization_is_needed(self):
-        for state in self.states:
-            for transition in self.transitions[state, self.symbols]:
-                if len(transition) > 1:
-                    return True
+        for origin, destination in self.transitions.items():
+            if len(destination) > 1:
+                return True
 
         return False
     
