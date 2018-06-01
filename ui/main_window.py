@@ -276,6 +276,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                  'the table and other selected from the automata list!')
             self.message.show()
 
+    def concatenation_action(self):
+        try:
+            item_text = self.automataList.selectedItems()[0].text()
+            message = ('Concatenation will be made with the current automata and the selected '+
+                    'automata from the list: ' + item_text + '.')
+            ok = QMessageBox.question(self, 'Select Automata', message, 
+                                    QMessageBox.Yes, QMessageBox.No)
+            if ok == QMessageBox.Yes:
+                self.add_automata_to_list()
+                other_automata = self._automata_list[self.automataList.currentRow()].copy()
+                self._automata.concatenation(other_automata)
+                self.update_transition_table()
+        
+        except IndexError:
+            self.message.setText('To use union operation you need a automata in '+
+                                 'the table and other selected from the automata list!')
+            self.message.show()
+
     def complement(self):
         self.add_automata_to_list()
         self._automata.complement()
@@ -557,10 +575,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.productionList.addItem(text[:-1])
 
     def reverse_action(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
-
-    def concatenation_action(self):
         self.message.setText('Not implemented yet!')
         self.message.show()
 

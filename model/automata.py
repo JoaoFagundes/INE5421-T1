@@ -190,13 +190,29 @@ class Automata():
         self.determinize()
         self.rename_states()
 
+    def concatenation(self, other):
+        
+        other.rename_states(len(self.states))
+        self.states.update(other.states)
+        self.symbols.update(other.symbols)
+
+        transitions_to_concat = {k for k,v in self.transitions.items() if v & self.final_states != set()}
+        #Maybe this is necessary, maybe not.
+        '''if other.initial_state in other.final_states:
+            self.final_states.update(other.final_states)
+        else:'''
+        
+        self.final_states = other.final_states
+        self.transitions.update(other.transitions)
+
+        for t in transitions_to_concat:
+            self.transitions[t] = {other.initial_state}
+
+    
     def reverse(self):
         pass
     
     def closure(self):
-        pass
-
-    def concatenation(self, other):
         pass
 
     def complement(self):
@@ -337,15 +353,20 @@ class Automata():
             self.complete()
             self.discard_equivalent_states()
 
+        self.remove_error_state()
+
     def discard_unreachable_states(self):
         reachable_states = list()
         reachable_states.append(self.initial_state)
 
         for state in reachable_states:
             for symbol in self.symbols:
-                for st in self.transitions[state, symbol]:
-                    if st not in reachable_states:
-                        reachable_states.append(st)
+                try:
+                    for st in self.transitions[state, symbol]:
+                        if st not in reachable_states:
+                            reachable_states.append(st)
+                except KeyError:
+                    continue
 
         unreachable_states = {state for state in self.states.copy() if state not in reachable_states}
         self.states = self.states - unreachable_states
@@ -396,6 +417,7 @@ class Automata():
                 break
 
         qErro = {k for k, v in equivalence_classes.copy().items() if v == {'qErro'}}
+        
         for k in qErro:
             equivalence_classes['qErro'] = equivalence_classes.pop(k)
 
@@ -458,6 +480,22 @@ class Automata():
                 return True
 
         return False
+
+    def remove_error_state(self):
+        error_state = 'qErro'
+        '''Only removes an error state if it's not a final state
+           
+           This guarantees that an automata that had an error state,
+           when complemented this error state becomes a valid state
+           and therefore should not be removed.
+        '''
+        if error_state not in self.final_states:
+            if error_state in self.states:
+                self.states.discard(error_state)
+
+            for k,v in self.transitions.copy().items():
+                if (k[0] == error_state) or (error_state in v):
+                    self.transitions.pop(k)
     
     def save(self, path):
         data = {}
