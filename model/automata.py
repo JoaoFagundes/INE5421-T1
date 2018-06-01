@@ -334,7 +334,7 @@ class Automata():
         if self.initial_state not in self.states:
             self.empty_language_automata()
         else:
-            self.create_phi_state()
+            self.complete()
             self.discard_equivalent_states()
 
     def discard_unreachable_states(self):
@@ -369,27 +369,6 @@ class Automata():
                 self.states = self.states - v
                 self.transitions.pop(k)
 
-    def create_phi_state(self):
-        phi_state = 'qPhi'
-        phi_needed = False
-        error_transitions = list()
-        for state in self.states:
-            for symbol in self.symbols:
-                try:
-                    if self.transitions[state, symbol] == set():
-                        pass
-                except KeyError:
-                    error_transitions.append([state, symbol])    
-
-        for k in error_transitions:
-            phi_needed = True
-            self.transitions[k[0], k[1]] = {phi_state}
-
-        if phi_needed:
-            self.states.add(phi_state)
-            for symbol in self.symbols:
-                self.transitions[phi_state, symbol] = {phi_state}
-     
     def discard_equivalent_states(self):
         equivalence_classes = dict()
         i = int(2)
@@ -400,13 +379,13 @@ class Automata():
         while True:
             copy = equivalence_classes.copy()
             for k, v in copy.items():
-                extras = self.combine_states(k, v, copy)
+                extras = self.combine_states(k, v, equivalence_classes, copy)
                 
                 while (len(extras) > 1):
                     state = 'q' + str(i)
                     equivalence_classes[state] = extras
                     i += int(1)
-                    extras = self.combine_states(state, extras, copy)
+                    extras = self.combine_states(state, extras, equivalence_classes, copy)
                 else:
                     if len(extras) == 1:
                         state = 'q' + str(i)
@@ -416,9 +395,14 @@ class Automata():
             if (copy == equivalence_classes):
                 break
 
+        qErro = {k for k, v in equivalence_classes.copy().items() if v == {'qErro'}}
+        for k in qErro:
+            equivalence_classes['qErro'] = equivalence_classes.pop(k)
+
+
         self.create_minimum_automata(equivalence_classes)
     
-    def combine_states(self, key, _class, equivalence_classes):
+    def combine_states(self, key, _class, equivalence_classes, copy):
         extras = set()
         q = _class.pop()
         subclass = _class.copy()
@@ -427,7 +411,7 @@ class Automata():
             for symbol in self.symbols:
                 r1 = self.transitions[q, symbol].copy().pop()
                 r2 = self.transitions[p, symbol].copy().pop()
-                if not self.in_same_classes(r1, r2, equivalence_classes):
+                if not self.in_same_classes(r1, r2, copy):
                     equivalence_classes[key].discard(p)
                     extras.add(p)
         return extras
