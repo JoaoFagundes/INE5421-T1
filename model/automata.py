@@ -213,7 +213,27 @@ class Automata():
         pass
     
     def closure(self):
-        pass
+        #criar novo estado inicial. Esse estado será final. 
+        #ele vai reproduzir as transições de saída do antigo estado inicial
+        #as transições que levavam pra estados finais agora levam a ele
+        '''
+            Talvez seja suficiente replicar as transições do estado inicial nos estados finais. Talvez.
+        '''
+        
+        new_initial_state = "q0'"
+        initial_state_transitions = {k:v for k,v in self.transitions.items() if k[0] == self.initial_state}
+        transitions_to_final_states = {k:v for k,v in self.transitions.items() if v & self.final_states != set()}
+
+        for k,v in initial_state_transitions.items():
+            self.transitions[new_initial_state, k[1]] = v
+        for k,v in transitions_to_final_states.items():
+            self.transitions[k] = {new_initial_state} | v
+
+        self.final_states.add(new_initial_state)
+        self.initial_state = new_initial_state
+        self.states.add(new_initial_state)
+
+            
 
     def complement(self):
         self.determinize()

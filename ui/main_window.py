@@ -294,6 +294,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                  'the table and other selected from the automata list!')
             self.message.show()
 
+    def closure_action(self):
+        self._automata.closure()
+        self.update_transition_table()
+
     def complement(self):
         self.add_automata_to_list()
         self._automata.complement()
@@ -575,9 +579,5 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.productionList.addItem(text[:-1])
 
     def reverse_action(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
-
-    def closure_action(self):
         self.message.setText('Not implemented yet!')
         self.message.show()
