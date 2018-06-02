@@ -1,3 +1,7 @@
+# Joao Victor Fagunes
+# Salomao Rodrigues Jacinto
+# INE5421 - Trablho Prático I Junho 2018
+
 import json
 from collections import OrderedDict
 
