@@ -94,6 +94,14 @@ class Automata():
         accepted_strings = {s[1] for s in maybe_accepted_strings if s[0] == self.initial_state}
         return accepted_strings
 
+    def add_transitions_to_empty(self):
+        for s in self.symbols:
+            for state in self.states:
+                try:
+                    test = self.transitions[state, s]
+                except KeyError:
+                    self.transitions[state, s] = set()
+
     def empty_language_automata(self):
         self.initial_state = 'q0'
         self.states = {self.initial_state}
@@ -102,7 +110,6 @@ class Automata():
         for s in self.symbols:
             self.transitions[self.initial_state, s] = {self.initial_state}
         
-
     def determinize(self):
         statesToDeterminize = list()
 
@@ -149,24 +156,18 @@ class Automata():
                     if newState not in statesToDeterminize:
                         statesToDeterminize.append(newState)
 
-        for s in self.symbols:
-            for state in newStates:
-                try:
-                    test = newTransitions[state, s]
-                except KeyError:
-                    newTransitions[state, s] = set()
-
         self.states = newStates
         self.final_states = newFinalStates
         self.transitions = newTransitions
+        self.add_transitions_to_empty()
 
     def union(self, other):
         self.symbols.update(other.symbols)
-        self.complete()
+        self.add_transitions_to_empty()
         self.rename_states()
 
         other.symbols.update(self.symbols)
-        other.complete()
+        other.add_transitions_to_empty()
         other.rename_states(len(self.states))
 
         newInitialState = 'qInitial'
@@ -207,7 +208,6 @@ class Automata():
 
         for t in transitions_to_concat:
             self.transitions[t] = {other.initial_state}
-
     
     def reverse(self):
         pass
@@ -231,9 +231,7 @@ class Automata():
 
         self.final_states.add(new_initial_state)
         self.initial_state = new_initial_state
-        self.states.add(new_initial_state)
-
-            
+        self.states.add(new_initial_state)  
 
     def complement(self):
         self.determinize()
@@ -243,12 +241,7 @@ class Automata():
 
     def complete(self):
         #funnction to put the error state
-        for s in self.symbols:
-            for state in self.states:
-                try:
-                    test = self.transitions[state, s]
-                except KeyError:
-                    self.transitions[state, s] = set()
+        self.add_transitions_to_empty()
 
         for k, v in self.transitions.items():
             if v == set():
@@ -304,11 +297,11 @@ class Automata():
             productions = set()
             for s in self.symbols:
                 aux_states = self.transitions[state, s]
-            if aux_states != set():
-                for aux_state in aux_states:
-                    if aux_state in self.final_states:
-                        productions.add(s)
-                    productions.add(s+map_state_letter[aux_state])
+                if aux_states != set():
+                    for aux_state in aux_states:
+                        if aux_state in self.final_states:
+                            productions.add(s)
+                        productions.add(s+map_state_letter[aux_state])
             grammar.add(map_state_letter[state], productions)
 
         for k, v in grammar.productions.items():
@@ -320,9 +313,7 @@ class Automata():
         
         return grammar
 
-    def rename_states(self, i=None):
-        if i == None:
-            i = int(0)
+    def rename_states(self, i=0):
         statesMap = dict()
         newStates = set()
         newFinalStates = set()
@@ -348,17 +339,11 @@ class Automata():
                 except KeyError:
                     continue
 
-        for s in self.symbols:
-            for state in newStates:
-                try:
-                    test = newTransitions[state, s]
-                except KeyError:
-                    newTransitions[state, s] = set()
-
         self.initial_state = newInitialState
         self.transitions = newTransitions
         self.states = newStates
         self.final_states = newFinalStates
+        self.add_transitions_to_empty()
 
     def minimize(self):
         if self.determinization_is_needed():
@@ -374,6 +359,7 @@ class Automata():
             self.discard_equivalent_states()
 
         self.remove_error_state()
+        self.add_transitions_to_empty()
 
     def discard_unreachable_states(self):
         reachable_states = list()
@@ -403,7 +389,6 @@ class Automata():
         
             if aux == new_living_states:
                 break
-
 
         for k, v in self.transitions.copy().items():
             if v & living_states == set():
@@ -440,7 +425,6 @@ class Automata():
         
         for k in qErro:
             equivalence_classes['qErro'] = equivalence_classes.pop(k)
-
 
         self.create_minimum_automata(equivalence_classes)
     
