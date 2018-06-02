@@ -209,9 +209,6 @@ class Automata():
             self.transitions[t] = {other.initial_state}
 
     
-    def reverse(self):
-        pass
-    
     def closure(self):
         #criar novo estado inicial. Esse estado será final. 
         #ele vai reproduzir as transições de saída do antigo estado inicial
@@ -233,8 +230,14 @@ class Automata():
         self.initial_state = new_initial_state
         self.states.add(new_initial_state)
 
-            
+    def empty_transitions_dict(self):
+        transitions = dict()
+        for state in self.states:
+            for symbol in self.symbols:
+                transitions[state, symbol] = set()
 
+        return transitions
+        
     def complement(self):
         self.determinize()
         self.rename_states()
@@ -274,6 +277,35 @@ class Automata():
         complement1 = other.copy()
         self.intersection(complement1.copy())
         return complement1
+
+    def reverse(self):
+        if self.determinization_is_needed():
+            self.determinize()
+            self.rename_states()
+
+        new_final_states = set()
+        new_initial_state = "q0'"
+        self.states.add(new_initial_state)
+        new_transitions = self.empty_transitions_dict()
+
+        if self.initial_state in self.final_states:
+            new_final_states = {new_initial_state, self.initial_state}
+        else:
+            new_final_states = {self.initial_state}
+
+        final_state_transitions = {k for k,v in self.transitions.items() if v & self.final_states != set()}
+        
+        for transition in final_state_transitions:
+            new_transitions[new_initial_state, transition[1]].add(transition[0])
+        
+        for k,v in self.transitions.copy().items():
+            if v != set():
+                new_transitions[v.copy().pop(), k[1]].add(k[0])
+
+        self.initial_state = new_initial_state
+        self.transitions = new_transitions
+        self.final_states = new_final_states
+            
 
     def convert_to_grammar(self):
         from .grammar import Grammar
@@ -414,7 +446,7 @@ class Automata():
         equivalence_classes = dict()
         i = int(2)
         equivalence_classes['q0'] = self.states - self.final_states
-        equivalence_classes['q1'] = self.final_states
+        equivalence_classes['q1'] = self.final_states.copy()
         copy = dict()
         
         while True:
