@@ -255,7 +255,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def minimize_action(self):
         self.add_automata_to_list()
         self._automata.minimize()
-        #self._automata.rename_states()
+        self._automata.rename_states()
         self.update_transition_table()
 
     def union_action(self):
@@ -295,6 +295,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.message.show()
 
     def closure_action(self):
+        self.add_automata_to_list()
         self._automata.closure()
         self.update_transition_table()
 
@@ -346,6 +347,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.message.setText('To use intersection operation you need a automata in '+
                                  'the table and other selected from the automata list!')
             self.message.show()
+
+    def reverse_action(self):
+        self.add_automata_to_list()
+        self._automata.reverse()
+        self.update_transition_table()
 
     def enumerate_strings(self):
         n, ok = QInputDialog.getInt(
@@ -577,7 +583,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for p in v:
                 text += p + '|'
             self.productionList.addItem(text[:-1])
-
-    def reverse_action(self):
-        self.message.setText('Not implemented yet!')
-        self.message.show()
