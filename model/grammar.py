@@ -48,6 +48,8 @@ class Grammar():
         for k, values in self.productions.items():
             end_states = dict()
             for v in values:
+                if v == '&':
+                    continue
                 try:
                     lower_symbol = v[0]
                     upper_symbol = v[1]
