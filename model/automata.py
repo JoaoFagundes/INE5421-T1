@@ -1,6 +1,6 @@
-# Joao Victor Fagunes
+# Joao Victor Fagundes
 # Salomao Rodrigues Jacinto
-# INE5421 - Trablho Prático I Junho 2018
+# INE5421 - Trabalho Prático I Junho 2018
 
 import json
 import string
@@ -202,10 +202,6 @@ class Automata():
         self.symbols.update(other.symbols)
 
         transitions_to_concat = {k for k,v in self.transitions.items() if v & self.final_states != set()}
-        #Maybe this is necessary, maybe not.
-        '''if other.initial_state in other.final_states:
-            self.final_states.update(other.final_states)
-        else:'''
         
         self.final_states = other.final_states
         self.transitions.update(other.transitions)
@@ -216,13 +212,6 @@ class Automata():
         self.add_transitions_to_empty()
     
     def closure(self):
-        #criar novo estado inicial. Esse estado será final. 
-        #ele vai reproduzir as transições de saída do antigo estado inicial
-        #as transições que levavam pra estados finais agora levam a ele
-        '''
-            Talvez seja suficiente replicar as transições do estado inicial nos estados finais. Talvez.
-        '''
-        
         new_initial_state = "q0'"
         initial_state_transitions = {k:v for k,v in self.transitions.items() if k[0] == self.initial_state}
         transitions_to_final_states = {k:v for k,v in self.transitions.items() if v & self.final_states != set()}
