@@ -1,6 +1,6 @@
-# Joao Victor Fagunes
+# Joao Victor Fagundes
 # Salomao Rodrigues Jacinto
-# INE5421 - Trablho Prático I Junho 2018
+# INE5421 - Trabalho Prático I Junho 2018
 
 import re
 from model.grammar import Grammar
