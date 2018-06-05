@@ -307,7 +307,7 @@ class Automata():
         for i, state in enumerate(self.states):
             if i != 0 and i % 26 == 0:
                 suffix += '\''
-            map_state_letter[state] = string.ascii_uppercase[i]+suffix
+            map_state_letter[state] = string.ascii_uppercase[i%26]+suffix
 
         test_initial_right = False
 
