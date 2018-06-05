@@ -5,6 +5,7 @@
 import json
 import string
 import re
+import copy
 
 class Automata():
 
@@ -447,25 +448,25 @@ class Automata():
         i = int(2)
         equivalence_classes['q0'] = self.states - self.final_states
         equivalence_classes['q1'] = self.final_states.copy()
-        copy = dict()
+        copy_classes = dict()
         
         while True:
-            copy = equivalence_classes.copy()
-            for k, v in copy.items():
-                extras = self.combine_states(k, v, equivalence_classes, copy)
+            copy_classes = copy.deepcopy(equivalence_classes)
+            for k, v in copy_classes.items():
+                extras = self.combine_states(k, v, equivalence_classes, copy_classes)
                 
                 while (len(extras) > 1):
                     state = 'q' + str(i)
                     equivalence_classes[state] = extras
                     i += int(1)
-                    extras = self.combine_states(state, extras, equivalence_classes, copy)
+                    extras = self.combine_states(state, extras, equivalence_classes, copy_classes)
                 else:
                     if len(extras) == 1:
                         state = 'q' + str(i)
                         equivalence_classes[state] = extras
                         i += int(1)
             
-            if (copy == equivalence_classes):
+            if (copy_classes == equivalence_classes):
                 break
 
         qErro = {k for k, v in equivalence_classes.copy().items() if v == {'qErro'}}
@@ -500,6 +501,7 @@ class Automata():
         new_transitions = dict()
         new_states = set()
         new_final_states = set()
+        new_initial_state = None
 
         for k, v in self.transitions.items():
             state_origin = None
@@ -510,12 +512,15 @@ class Automata():
                 
                 if v & equivalent_states != set():
                     state_destination = new_state
-            new_transitions[state_origin, k[1]] = {state_destination}
+
+            if state_origin is not None and state_destination is not None:
+                new_transitions[state_origin, k[1]] = {state_destination}
+
 
         for new_state, equivalent_states in equivalence_classes.items():
             new_states.add(new_state)
             if self.initial_state in equivalent_states:
-                self.initial_state = new_state
+                new_initial_state = new_state
                 
             for state in equivalent_states:
                 if state in self.final_states:
@@ -524,6 +529,7 @@ class Automata():
         self.states = new_states
         self.final_states = new_final_states
         self.transitions = new_transitions
+        self.initial_state = new_initial_state
     
     def determinization_is_needed(self):
         for origin, destination in self.transitions.items():
