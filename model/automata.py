@@ -309,6 +309,8 @@ class Automata():
                 suffix += '\''
             map_state_letter[state] = string.ascii_uppercase[i]+suffix
 
+        test_initial_right = False
+
         initial_productions = set()
         for s in self.symbols:
             aux_states = self.transitions[self.initial_state, s]
@@ -317,11 +319,9 @@ class Automata():
                     if aux_state in self.final_states:
                         initial_productions.add(s)
                     initial_productions.add(s+map_state_letter[aux_state])
+                    if map_state_letter[aux_state] == map_state_letter[self.initial_state]:
+                        test_initial_right = True
 
-        if self.initial_state in self.final_states:
-            new_initial_productions = initial_productions.copy()
-            new_initial_productions.add('&')
-            grammar.add(map_state_letter[self.initial_state]+'\'', new_initial_productions)
         grammar.add(map_state_letter[self.initial_state], initial_productions)
 
         for state in self.states - {self.initial_state}:
@@ -333,7 +333,23 @@ class Automata():
                         if aux_state in self.final_states:
                             productions.add(s)
                         productions.add(s+map_state_letter[aux_state])
+                        if map_state_letter[aux_state] == map_state_letter[self.initial_state]:
+                            test_initial_right = True
             grammar.add(map_state_letter[state], productions)
+
+        if self.initial_state in self.final_states:
+            if test_initial_right:
+                old_initial_productions = initial_productions.copy()
+                initial_productions.add('&')
+                grammar.edit_key(map_state_letter[self.initial_state], 
+                                 map_state_letter[self.initial_state]+'\'',
+                                 initial_productions)
+                grammar.add(map_state_letter[self.initial_state], old_initial_productions)
+            else:
+                initial_productions.add('&')
+                grammar.edit_key(map_state_letter[self.initial_state], 
+                                 map_state_letter[self.initial_state],
+                                 initial_productions)
 
         for k, v in grammar.productions.items():
             if v == set():
